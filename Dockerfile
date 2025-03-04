@@ -15,4 +15,5 @@ RUN pip install -r requirements.txt
 
 # Comando per eseguire l'applicazione
 CMD ["python", "app.py"]
+# docker build -t cdmo-proj-image .
 # docker run -it --rm -v /home/francesco/Scrivania/CDMO-proj/CDMO-project/:/cdmo cdmo-proj-image

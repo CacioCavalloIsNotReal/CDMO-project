@@ -1,8 +1,5 @@
-var int: x;  % Prima variabile
-var int: y;  % Seconda variabile
-
-% Definiamo un dominio per x e y, ad esempio tra 0 e 10
-
+var 0..10: x;  % Prima variabile
+var 0..10: y;  % Seconda variabile
 
 % Constrains
 constraint x + y = 10;
