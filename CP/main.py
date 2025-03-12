@@ -1,6 +1,6 @@
 from cp import *
 
-class CP_instance:
+class CP_file_instance:
     def __init__(self, filename, m, n, l, s, d):
         self.filename=filename
         self.m = m  # n. couriers
@@ -10,7 +10,7 @@ class CP_instance:
         self.d = d  # manhattan distance matrix
 
     def __repr__(self):
-        return f"CP_instance(m={self.m}, n={self.n}, l={self.l}, s={self.s}, d={self.d})"
+        return f"instance(m={self.m}, n={self.n}, l={self.l}, s={self.s}, d={self.d})"
     
     def to_file(self, path):
         out_path = "".join([path, self.filename, '.dzn'])
@@ -25,7 +25,7 @@ class CP_instance:
             f.write('|];\n')
         return out_path
     
-def read_row_instances(path:str) -> CP_instance:
+def read_row_instances(path:str) -> CP_file_instance:
     filename = "".join(path.split('/')[-1].split('.')[:-1])
     with open(path, 'r') as f:
         matrix = ''
@@ -41,7 +41,7 @@ def read_row_instances(path:str) -> CP_instance:
             else:
                 matrix += line[:-1] + '; '
     d = np.matrix(matrix[:-2]).tolist()
-    instance = CP_instance(filename,m,n,l,s,d)
+    instance = CP_file_instance(filename,m,n,l,s,d)
     return instance
 
 if __name__ == '__main__':

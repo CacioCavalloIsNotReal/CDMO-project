@@ -21,7 +21,9 @@ def cp_model( instance_file, solver:str = 'gecode', time_limit:int=300)->dict:
     result = instance.solve(timeout=datetime.timedelta(seconds=time_limit), intermediate_solutions=True)
 
     for _, solution in (enumerate(result)):
-        print(solution.wa)
+        print(solution._from)
+        print(solution._to)
+        print(solution._weight)
         #print(solution.c)
         print()
 
