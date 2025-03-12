@@ -8,8 +8,10 @@ print("Minizinc Python API version:", minizinc.__version__, '\n')
 module_path = os.path.dirname(os.path.realpath(__file__))
 print(module_path)
 
-def cp_model( solver:str = 'gecode', time_limit:int=300)->dict:
-    instance_file = module_path+'/instances/cooking.dzn'
+def cp_model( instance_file, solver:str = 'gecode', time_limit:int=300)->dict:
+    ooooooooooo = module_path+'/instances/cooking.dzn'
+    print('la merda che gli piace', ooooooooooo)
+    print('la merda che gli do io (ho bisogno di aiuto)', instance_file)
     output = {}
     
     cp_model = Model(module_path+'/cp.mzn')
@@ -22,8 +24,8 @@ def cp_model( solver:str = 'gecode', time_limit:int=300)->dict:
     result = instance.solve(timeout=datetime.timedelta(seconds=time_limit), intermediate_solutions=True)
 
     for _, solution in (enumerate(result)):
-        print(solution.b)
-        print(solution.c)
+        print(solution.wa)
+        #print(solution.c)
         print()
 
     return output

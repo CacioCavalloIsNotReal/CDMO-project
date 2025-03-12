@@ -1,47 +1,26 @@
-% Baking cakes for the school fete (with data file)
-int: flour;  %no. grams of flour available
-int: banana; %no. of bananas available
-int: sugar;  %no. grams of sugar available
-int: butter; %no. grams of butter available
-int: cocoa;  %no. grams of cocoa available
+% problem pars
+/*
+int: M;
+int: N;
+array[1..M] of int: L;
+array[1..N] of int: S;
+array[N+1,N+] of int: D;
+*/
+int: nc = 3;
 
+var 1..nc: wa;   var 1..nc: nt;  var 1..nc: sa;   var 1..nc: q;
+var 1..nc: nsw;  var 1..nc: v;   var 1..nc: t;
 
-constraint assert(flour >= 0,"Invalid datafile: " ++
-                  "Amount of flour should be non-negative");
+constraint wa != nt;
+constraint wa != sa;
+constraint nt != sa;
+constraint nt != q;
+constraint sa != q;
+constraint sa != nsw;
+constraint sa != v;
+constraint q != nsw;
+constraint nsw != v;
+solve satisfy;
 
-constraint assert(banana >= 0,"Invalid datafile: " ++
-                  "Amount of banana should be non-negative");
+output [show(wa)];
 
-constraint assert(sugar >= 0,"Invalid datafile: " ++
-                  "Amount of sugar should be non-negative");
-
-constraint assert(butter >= 0,"Invalid datafile: " ++
-                  "Amount of butter should be non-negative");
-
-constraint assert(cocoa >= 0,"Invalid datafile: " ++
-                  "Amount of cocoa should be non-negative");
-
-
-var 0..100: b; % no. of banana cakes
-var 0..100: c; % no. of chocolate cakes
-
-
-% flour
-constraint 250*b + 200*c <= flour;
-
-% bananas
-constraint 2*b  <= banana;
-
-% sugar
-constraint 75*b + 150*c <= sugar;
-
-% butter
-constraint 100*b + 150*c <= butter;
-
-% cocoa
-constraint 75*c <= cocoa;
-
-% maximize our profit
-solve maximize 400*b + 450*c;
-
-output [show(b), " ", show(c)];
