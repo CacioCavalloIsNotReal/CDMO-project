@@ -21,7 +21,7 @@ class CP_instance:
             f.write('S = [' + ', '.join(f'{size}' for size in self.s) + '];\n')
             f.write('D = [')
             for row in self.d:
-                f.write('| ' + ','.join(map(str, row)) + '\n')
+                f.write('|' + ','.join(map(str, row)) + '\n')
             f.write('|];\n')
         return out_path
     

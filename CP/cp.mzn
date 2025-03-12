@@ -1,11 +1,11 @@
 % problem pars
-/*
+
 int: M;
 int: N;
 array[1..M] of int: L;
 array[1..N] of int: S;
-array[N+1,N+] of int: D;
-*/
+array[1..N+1,1..N+1] of int: D;
+
 int: nc = 3;
 
 var 1..nc: wa;   var 1..nc: nt;  var 1..nc: sa;   var 1..nc: q;

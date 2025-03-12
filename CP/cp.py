@@ -9,9 +9,6 @@ module_path = os.path.dirname(os.path.realpath(__file__))
 print(module_path)
 
 def cp_model( instance_file, solver:str = 'gecode', time_limit:int=300)->dict:
-    ooooooooooo = module_path+'/instances/cooking.dzn'
-    print('la merda che gli piace', ooooooooooo)
-    print('la merda che gli do io (ho bisogno di aiuto)', instance_file)
     output = {}
     
     cp_model = Model(module_path+'/cp.mzn')
