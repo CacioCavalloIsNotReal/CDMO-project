@@ -1,5 +1,12 @@
-# Usa un'immagine base (ad esempio, una versione di Python)
-FROM python:3.9
+FROM ubuntu:22.04
+
+RUN apt-get update
+RUN apt-get install -y tzdata
+RUN apt-get install -y wget
+RUN apt-get install -y python3-pip
+
+# set python3 env variable
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Imposta la directory di lavoro
 RUN mkdir cdmo
@@ -8,17 +15,23 @@ WORKDIR /cdmo
 # Copia i file necessari nella directory di lavoro
 ADD . .
 
-# Installa le dipendenze
+# python packages
+RUN python3 -m pip install -r requirements.txt
 
-# important bec in intstall the driver
-RUN apt-get update && apt-get install -y minizinc=2.6.4+dfsg1-1
+# minizinc
+ARG MINIZINC_VERSION=2.9.2
 
-RUN pip install -r requirements.txt
+RUN wget https://github.com/MiniZinc/MiniZincIDE/releases/download/$MINIZINC_VERSION/MiniZincIDE-$MINIZINC_VERSION-bundle-linux-x86_64.tgz
+RUN tar -xvf MiniZincIDE-$MINIZINC_VERSION-bundle-linux-x86_64.tgz
 
-# Comando per eseguire l'applicazione
+# Sposta MiniZinc in una cartella più accessibile
+RUN mv MiniZincIDE-2.9.2-bundle-linux-x86_64 /opt/minizinc
+
+# Aggiungi MiniZinc al PATH e imposta le variabili d'ambiente
+ENV PATH="/opt/minizinc/bin:$PATH"
+ENV LD_LIBRARY_PATH="/opt/minizinc/lib:${LD_LIBRARY_PATH:-}"
+
+# Verifica l'installazione di MiniZinc
+RUN minizinc --version
+
 CMD ["python", "CP/main.py"]
-# docker build -t cdmo-proj-image .
-# per entrare nella bash del container
-# docker run -it cdmo-proj-image bash
-
-# docker run -it --rm -v /home/francesco/Scrivania/CDMO/CDMO-proj/CDMO-project/:/cdmo cdmo-proj-image
