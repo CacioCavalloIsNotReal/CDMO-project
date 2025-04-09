@@ -3,35 +3,49 @@ import numpy as np
 import datetime
 import minizinc
 from minizinc import Instance, Model, Solver, Status
+from Solutions import *
+import time
 
-print("Minizinc Python API version:", minizinc.__version__, '\n')
-module_path = os.path.dirname(os.path.realpath(__file__))
-print(module_path)
+# print("Minizinc Python API version:", minizinc.__version__, '\n')
+# module_path = os.path.dirname(os.path.realpath(__file__))
+# print(module_path)
+if False:
+    import logging
+    logging.basicConfig(filename="minizinc-python.log", level=logging.DEBUG)
 
-def cp_model( instance_file, solver:str = 'chuffed', time_limit:int=300)->dict:
-    output = {}
-    
+def cp_model(instance_file:str,
+             # solver:str = 'gecode', # gecode   chuffed
+             solver:str = 'chuffed', # gecode   chuffed
+             time_limit:int=300000,
+             verbose = True,
+            )->Solutions:
+
+    module_path = os.path.dirname(os.path.realpath(__file__))
+    filename = instance_file.split('/')[-1]
+    current_solution = Solutions(filename=filename)
     cp_model = Model(module_path+'/cp.mzn')
     cp_model.add_file(instance_file, parse_data=True)
-    print('CP model loaded')
 
     solver_ins = Solver.lookup(solver)
-    print(solver_ins)
-    print('---------------------------')
-    print(cp_model)
     instance = Instance(solver_ins, cp_model)
+    print(filename)
+    timedelta = datetime.timedelta(milliseconds=time_limit)
+    try:
+        #   ⚠⚠⚠ DANGER ZONE ⚠⚠⚠
+        start_time = time.time()
+        result = instance.solve(timeout=timedelta,
+                                intermediate_solutions=True,
+                                verbose=True)
+        total_time = time.time() - start_time
+        if result.solution:
+            current_solution.set_exec_time(total_time)
+            current_solution.set_solution(result)
+        else:
+            current_solution.set_failed_solution()
 
-    print('suca')
-    result = instance.solve(timeout=datetime.timedelta(seconds=time_limit),
-                            intermediate_solutions=True)
-    print('forte')
-    print(result)
-    for _, solution in (enumerate(result)):
-        print(solution)
-        # print(solution._from)
-        # print(solution._to)
-        # print(solution._weight)
-        #print(solution.c)
-        print()
-
-    return output
+    except Exception as e:
+        if verbose:
+            print(e)
+        current_solution.set_failed_solution()
+        
+    return current_solution
