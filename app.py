@@ -1,10 +1,27 @@
-import subprocess
+import sys
+sys.path.append("MIP")
+sys.path.append("CP")
+import run as mip_run
+import main as cp_run
 
-# Comando per eseguire MiniZinc
-command = ["minizinc", "examples/model0.mzn"]
+# Choose what to run
 
-# Esegui il comando e cattura l'output
-result = subprocess.run(command, capture_output=True, text=True)
+if __name__ == "__main__":
+    print("Welcome to the Problem Solver!")
+    print("This program solves the problem using different approaches.")
+    print("Available approaches: CP, MIP, SMT.")
 
-# Mostra l'output di MiniZinc
-print(result.stdout)
+    # Choose approach
+    approach = input("Choose an approach (CP/MIP/SMT): ").strip().lower()
+    if approach not in ["cp", "mip", "smt"]:
+        print("Invalid choice. Please choose 'CP', 'MIP', or 'SMT'.")
+        exit(1)
+    elif approach == "cp":
+        cp_run.run_cp()
+        # print("CP approach is not implemented yet.")
+        # exit(1)
+    elif approach == "mip":
+        mip_run.run_mip()
+    elif approach == "smt":
+        print("SMT approach is not implemented yet.")
+        exit(1)

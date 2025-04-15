@@ -1,9 +1,10 @@
+from CP.utils import read_raw_instances
 from CP_file_instance import *
-from utils import *
 from cp import *
 from tqdm import tqdm
 
-if __name__ == '__main__':
+def run_cp():
+# if __name__ == '__main__':
     convert_files=False
 
     module_path = os.path.dirname(os.path.realpath(__file__))

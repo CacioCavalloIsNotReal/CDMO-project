@@ -57,8 +57,8 @@ def run_solver(instance_path, solver_name, symbreak):
         add_symmetry_break=symbreak,
     )
 
-if __name__ == "__main__":
-
+# if __name__ == "__main__":
+def run_mip():
     # Choose solver
     print("Welcome to the MIP Solver!")
     print("This program solves the MIP problem using different solvers.")
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         
         results = run_solver(instance_path, solver_name, symbreak)
         print(f"Results for {instance_name}: {results}")
-        
+
         # Write results to file
         output_path = os.path.join(results_dir, instance_name + ".json")
         utils.write_output(results, output_path, solver_name)
