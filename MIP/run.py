@@ -2,7 +2,7 @@ import model_symbreak as model
 import mip_utils as utils
 import os
 
-INSTANCES_PATH = "/Users/giacomopiergentili/Developer/CDMO/project-final/CDMO-project/instances"
+INSTANCES_PATH = "instances"
 
 
 def choose_solver():
@@ -57,7 +57,6 @@ def run_solver(instance_path, solver_name, symbreak):
         add_symmetry_break=symbreak,
     )
 
-# if __name__ == "__main__":
 def run_mip():
     # Choose solver
     print("Welcome to the MIP Solver!")
@@ -70,7 +69,6 @@ def run_mip():
         results_dir = os.path.join("MIP/result_symbreak", solver_name)
     else:
         results_dir = os.path.join("MIP/result_nosymbreak", solver_name)
-
     
     # Run on a single instance or all the instances
     if choose_instances_num(): 
@@ -79,12 +77,14 @@ def run_mip():
         for instance_file in os.listdir(INSTANCES_PATH):
             if instance_file.endswith(".dat"):  # Ensure only .dat files are processed
                 instance_path = os.path.join(INSTANCES_PATH, instance_file)
+                instance_name = os.path.basename(instance_path).split('.')[0]
                 print(f"Running on instance: {instance_file}")
+
                 results = run_solver(instance_path, solver_name, symbreak)
-                print(f"Results for {instance_file}: {results}")
-                
+                print(f"Results for {instance_name}: {results}")
+                1
                 # Write results to file
-                output_path = os.path.join(results_dir, f"{instance_file}.json")
+                output_path = os.path.join(results_dir, f"{instance_name}.json")
                 utils.write_output(results, output_path, solver_name)
     
     else:

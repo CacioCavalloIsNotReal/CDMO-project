@@ -7,62 +7,6 @@ import os
 import mip_utils as utils
 from collections import defaultdict # Use defaultdict for easier grouping
 
-# def parse_instance(filepath):
-#     """Parses the MCP instance file."""
-#     try:
-#         with open(filepath, 'r') as f:
-#             lines = f.readlines()
-#             lines = [line.strip() for line in lines if line.strip()] # Remove empty lines and strip whitespace
-
-#             m = int(lines[0])
-#             n = int(lines[1])
-#             capacities_list = list(map(int, lines[2].split()))
-#             sizes_list = list(map(int, lines[3].split()))
-
-#             # Read distance matrix (n+1) x (n+1)
-#             distances_flat = []
-#             for i in range(4, 4 + n + 1):
-#                 if i < len(lines) and lines[i]:
-#                     distances_flat.extend(map(int, lines[i].split()))
-#                 else:
-#                     raise ValueError(f"Missing or empty line for distance matrix row starting at line index {i} (expected {n+1} rows)")
-
-#             if len(capacities_list) != m:
-#                 raise ValueError(f"Number of capacities ({len(capacities_list)}) does not match m ({m})")
-#             if len(sizes_list) != n:
-#                 raise ValueError(f"Number of sizes ({len(sizes_list)}) does not match n ({n})")
-#             if len(distances_flat) != (n + 1) * (n + 1):
-#                  raise ValueError(f"Distance matrix size incorrect. Expected {(n+1)*(n+1)} elements, got {len(distances_flat)}")
-
-#             # Use dictionaries keyed by 0-based indices
-#             capacities = {i: capacities_list[i] for i in range(m)}
-#             sizes = {j: sizes_list[j] for j in range(n)}
-
-#             dist_matrix = {}
-#             origin_idx_0based = n # The origin is the last index (n+1 in 1-based, n in 0-based)
-#             idx = 0
-#             for r in range(n + 1): # 0 to n
-#                 for c in range(n + 1): # 0 to n
-#                     dist_matrix[(r, c)] = distances_flat[idx]
-#                     idx += 1
-
-#             params = {
-#                 'm': m,
-#                 'n': n,
-#                 'capacities': capacities, # dict courier_idx -> capacity
-#                 'sizes': sizes,          # dict item_idx -> size
-#                 'distances': dist_matrix, # dict (from_idx, to_idx) -> distance
-#                 'origin_idx': origin_idx_0based # Index of the origin in 0-based system
-#             }
-#             return params
-
-#     except FileNotFoundError:
-#         print(f"Error: Input file not found at {filepath}", file=sys.stderr)
-#         sys.exit(1)
-#     except Exception as e:
-#         print(f"Error parsing instance file {filepath}: {e}", file=sys.stderr)
-#         sys.exit(1)
-
 def solve_mcp_mip(params, time_limit_sec=300, add_symmetry_break=False, solver="PULP_CBC_CMD"): # Added flag
     """Builds and solves the MCP MIP model using PuLP, optionally with symmetry breaking."""
     m = params['m']
@@ -183,6 +127,7 @@ def solve_mcp_mip(params, time_limit_sec=300, add_symmetry_break=False, solver="
     solver_name = chosen_solver.name
     print(f"Solving MCP MIP with PuLP (Solver: {solver_name}, Symmetry Break: {add_symmetry_break})...")
     start_time = time.time()
+    pulp.LpSolverDefault.msg = True # Enable solver output
     solver = chosen_solver # Set msg=True to see solver output
     prob.solve(solver)
     end_time = time.time()
@@ -206,7 +151,7 @@ def solve_mcp_mip(params, time_limit_sec=300, add_symmetry_break=False, solver="
         results['optimal'] = True
         results['obj'] = int(round(pulp.value(prob.objective)))
         print(f"Optimal Objective (Max Distance Z): {results['obj']}")
-    elif prob.status in [pulp.LpStatusFeasible, pulp.LpStatusUndefined]: # Undefined often means feasible found but not optimal within time
+    elif prob.status == pulp.LpStatusUndefined: # Undefined often means feasible found but not optimal within time
         results['optimal'] = False
         if prob.objective is not None and pulp.value(prob.objective) is not None:
              results['obj'] = int(round(pulp.value(prob.objective)))
@@ -289,17 +234,6 @@ def solve_mcp_mip(params, time_limit_sec=300, add_symmetry_break=False, solver="
 
 
     return results
-
-# def write_output(results, output_path, approach_name="mip_pulp"): # Allow customizing approach name
-#     """Writes the results to a JSON file."""
-#     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-#     try:
-#         with open(output_path, 'w') as f:
-#             output_data = {approach_name: results}
-#             json.dump(output_data, f, indent=4)
-#         print(f"Results written to {output_path}")
-#     except Exception as e:
-#         print(f"Error writing output file {output_path}: {e}", file=sys.stderr)
 
 # --- Main Execution ---
 if __name__ == "__main__":

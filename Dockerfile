@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM --platform=linux/amd64 ubuntu:22.04
 
 RUN apt-get update
 RUN apt-get install -y tzdata
@@ -37,4 +37,4 @@ ENV LD_LIBRARY_PATH="/opt/minizinc/lib:${LD_LIBRARY_PATH:-}"
 # Verifica l'installazione di MiniZinc
 RUN minizinc --version
 
-CMD ["python", "CP/main.py"]
+CMD ["python", "app.py"]
