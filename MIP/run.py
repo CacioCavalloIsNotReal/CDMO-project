@@ -66,9 +66,9 @@ def run_mip():
     symbreak = choose_symbreak()
 
     if symbreak:
-        results_dir = os.path.join("MIP/result_symbreak", solver_name)
+        results_dir = os.path.join("./MIP/result_symbreak", solver_name)
     else:
-        results_dir = os.path.join("MIP/result_nosymbreak", solver_name)
+        results_dir = os.path.join("./MIP/result_nosymbreak", solver_name)
     
     # Run on a single instance or all the instances
     if choose_instances_num(): 
@@ -82,7 +82,7 @@ def run_mip():
 
                 results = run_solver(instance_path, solver_name, symbreak)
                 print(f"Results for {instance_name}: {results}")
-                1
+                
                 # Write results to file
                 output_path = os.path.join(results_dir, f"{instance_name}.json")
                 utils.write_output(results, output_path, solver_name)
@@ -98,6 +98,7 @@ def run_mip():
         print(f"Results for {instance_name}: {results}")
 
         # Write results to file
+        print(f"Writing results to {results_dir}...")
         output_path = os.path.join(results_dir, instance_name + ".json")
         utils.write_output(results, output_path, solver_name)
 

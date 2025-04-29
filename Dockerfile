@@ -12,12 +12,11 @@ RUN apt-get install -y nano
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Imposta la directory di lavoro
-RUN mkdir cdmo
-WORKDIR /cdmo
+RUN mkdir /home/cdmo
+WORKDIR /home/cdmo
 
 # Copia i file necessari nella directory di lavoro
 ADD . .
-COPY HiGHSstatic.v1.10.0.x86_64-linux-gnu-cxx11 /HiGHSstatic.v1.10.0.x86_64-linux-gnu-cxx11
 
 # python packages
 RUN python3 -m pip install -r requirements.txt
@@ -31,13 +30,23 @@ RUN tar -xvf MiniZincIDE-$MINIZINC_VERSION-bundle-linux-x86_64.tgz
 # Sposta MiniZinc in una cartella più accessibile
 RUN mv MiniZincIDE-$MINIZINC_VERSION-bundle-linux-x86_64 /opt/minizinc
 
-# Aggiungi MiniZinc al PATH e imposta le variabili d'ambiente
-ENV PATH="/opt/minizinc/bin:$PATH"
-ENV PATH="/HiGHSstatic.v1.10.0.x86_64-linux-gnu-cxx11/bin:${PATH}"
+# HIGhS
 
-ENV LD_LIBRARY_PATH="/opt/minizinc/lib:${LD_LIBRARY_PATH:-}"
+RUN mkdir /opt/highs
+RUN wget https://github.com/JuliaBinaryWrappers/HiGHSstatic_jll.jl/releases/download/HiGHSstatic-v1.10.0%2B0/HiGHSstatic.v1.10.0.x86_64-linux-gnu-cxx11.tar.gz
+RUN tar -xvzf HiGHSstatic.v1.10.0.x86_64-linux-gnu-cxx11.tar.gz -C /opt/highs
+
+
+# Aggiungi MiniZinc al PATH e imposta le variabili d'ambiente
+# ENV LD_LIBRARY_PATH=""
+ENV PATH="/opt/minizinc/bin:$PATH"
+# ENV LD_LIBRARY_PATH="/opt/minizinc/lib:${LD_LIBRARY_PATH}"
+
+ENV PATH="/opt/highs/bin:$PATH"
+# ENV LD_LIBRARY_PATH="/opt/highs/lib:${LD_LIBRARY_PATH}"
 
 # Verifica l'installazione di MiniZinc
 RUN minizinc --version
+RUN highs --version
 
 CMD ["python", "app.py"]
