@@ -50,3 +50,7 @@ RUN minizinc --version
 RUN highs --version
 
 CMD ["python", "app.py"]
+
+# Commands to run
+# docker build -t cdmo-project .
+# docker run -it cdmo-project bash
