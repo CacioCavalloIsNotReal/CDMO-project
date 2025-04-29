@@ -17,6 +17,7 @@ WORKDIR /cdmo
 
 # Copia i file necessari nella directory di lavoro
 ADD . .
+COPY HiGHSstatic.v1.10.0.x86_64-linux-gnu-cxx11 /HiGHSstatic.v1.10.0.x86_64-linux-gnu-cxx11
 
 # python packages
 RUN python3 -m pip install -r requirements.txt
@@ -32,6 +33,8 @@ RUN mv MiniZincIDE-$MINIZINC_VERSION-bundle-linux-x86_64 /opt/minizinc
 
 # Aggiungi MiniZinc al PATH e imposta le variabili d'ambiente
 ENV PATH="/opt/minizinc/bin:$PATH"
+ENV PATH="/HiGHSstatic.v1.10.0.x86_64-linux-gnu-cxx11/bin:${PATH}"
+
 ENV LD_LIBRARY_PATH="/opt/minizinc/lib:${LD_LIBRARY_PATH:-}"
 
 # Verifica l'installazione di MiniZinc
