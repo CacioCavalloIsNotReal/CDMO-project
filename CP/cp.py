@@ -45,6 +45,7 @@ def cp_model(instance_file:str,
 
     except Exception as e:
         if verbose:
+            print("unexpected error-")
             print(e)
         current_solution.set_failed_solution()
         
