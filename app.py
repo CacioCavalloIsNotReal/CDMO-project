@@ -1,8 +1,8 @@
 import sys
 sys.path.append("MIP")
-sys.path.append("CP")
+# sys.path.append("CP")
 import run as mip_run
-import main as cp_run
+import CP.main as cp_run
 
 # Choose what to run
 

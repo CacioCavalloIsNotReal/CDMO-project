@@ -42,8 +42,9 @@ ENV PATH="/opt/highs/bin:$PATH"
 RUN minizinc --version
 RUN highs --version
 
-CMD ["python", "app.py"]
+CMD ["python", "/cdmo/app.py"]
 
 # Commands to run
 # docker build -t cdmo-project .
 # docker run -it cdmo-project bash
+# docker run -it --rm -v /home/francesco/Scrivania/CDMO/repo/CDMO-project/:/cdmo cdmo-proj-image

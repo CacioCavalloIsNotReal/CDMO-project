@@ -1,4 +1,4 @@
-from CP_file_instance import *
+from CP.CP_file_instance import *
 import numpy as np
 
 def read_raw_instances(path:str) -> CP_file_instance:

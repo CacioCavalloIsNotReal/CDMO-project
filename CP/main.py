@@ -1,11 +1,11 @@
 from CP.utils import read_raw_instances
-from CP_file_instance import *
-from cp import *
+from CP.CP_file_instance import *
+from CP.cp import *
 from tqdm import tqdm
 
 def run_cp():
-# if __name__ == '__main__':
     convert_files=False
+    solvers = ['gecode', 'chuffed']
 
     module_path = os.path.dirname(os.path.realpath(__file__))
     savepath = module_path+'/instances/'
@@ -18,11 +18,18 @@ def run_cp():
             istc = read_raw_instances(path)
             cp_path = istc.to_file(savepath, raw=False)
 
-    solutions = []
+    solutions = {solver:[] for solver in solvers}
     dzn_names = os.listdir(savepath)    # list of dzn contained into CP/instances
-    for name in dzn_names[:10]:
-        path = savepath+'/'+name
-        solutions.append(cp_model(path, verbose=True)) 
+    for solver in solvers:
+        print(f"************************************using {solver}************************************")
+        for name in dzn_names[:10]:
 
-    for solution in solutions:
-        print(solution.failed)
+            path = savepath+'/'+name
+            solutions[solver].append(cp_model(path, verbose=True)) 
+
+    print("ayos")
+    # for solution in solutions:
+    #     print(solution.failed)
+
+if __name__ == '__main__':
+    run_cp()
