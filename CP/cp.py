@@ -18,12 +18,16 @@ def cp_model(instance_file:str,
              solver:str = 'chuffed', # gecode   chuffed
              time_limit:int=300000,
              verbose = True,
+             symm_break = False
             )->Solutions:
 
     module_path = os.path.dirname(os.path.realpath(__file__))
     filename = instance_file.split('/')[-1]
     current_solution = Solutions(filename=filename)
-    cp_model = Model(module_path+'/cp.mzn')
+    if symm_break:
+        cp_model = Model(module_path+'/cp_sb.mzn')
+    else:
+        cp_model = Model(module_path+'/cp.mzn')
     cp_model.add_file(instance_file, parse_data=True)
 
     solver_ins = Solver.lookup(solver)

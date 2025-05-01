@@ -26,7 +26,7 @@ def run_cp():
         for name in dzn_names[:1]:
 
             path = savepath+'/'+name
-            solutions[solver].append(cp_model(path, verbose=True)) 
+            solutions[solver].append(cp_model(path, verbose=True, symm_break=True)) 
 
     print("ayos")
     # for solution in solutions:
