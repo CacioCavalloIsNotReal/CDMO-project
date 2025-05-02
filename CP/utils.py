@@ -19,3 +19,12 @@ def read_raw_instances(path:str) -> CP_file_instance:
     d = np.matrix(matrix[:-2]).tolist()
     instance = CP_file_instance(filename,m,n,l,s,d)
     return instance
+
+def save_solution():
+    """
+    file 1.json
+        nome solver:...
+        nome solver:...
+    """
+    
+    ...

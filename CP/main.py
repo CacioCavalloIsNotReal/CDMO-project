@@ -19,16 +19,22 @@ def run_cp():
             istc = read_raw_instances(path)
             cp_path = istc.to_file(savepath, raw=False)
 
-    # solutions = {solver:[] for solver in solvers}
-    # dzn_names = os.listdir(savepath)    # list of dzn contained into CP/instances
-    # for solver in solvers:
-    #     print(f"************************************using {solver} solver************************************")
-    #     for name in dzn_names[:1]:
+    
+    dzn_names = os.listdir(savepath)    # list of dzn contained into CP/instances
+    solutions = {name:[] for name in dzn_names}
+    for solver in solvers:
+        print(f"************************************using {solver} solver************************************")
+        for name in dzn_names[:1]:
 
-    #         path = savepath+'/'+name
-    #         solutions[solver].append(cp_model(path, verbose=True, symm_break=True)) 
-    cp_model(savepath+'/inst01.dzn', verbose=True, symm_break=True)
+            path = savepath+'/'+name
+            solutions[name].append(cp_model(path,
+                                             verbose=True, 
+                                             symm_break=False, 
+                                             solver=solver
+                                            ).get_solution()) 
+    # cp_model(savepath+'/inst01.dzn', verbose=True, symm_break=True)
     print("ayos")
+    print(solutions)
     # for solution in solutions:
     #     print(solution.failed)
 

@@ -74,5 +74,6 @@ ann: search_ann4 = int_search(node_subset, first_fail, indomain_random);
 ann: search_ann5 = int_search(node_subset, dom_w_deg, indomain_min); 
 ann: search_ann6 = int_search(node_subset, dom_w_deg, indomain_random); 
 
-solve :: search_ann3 minimize max_distance;
+% solve :: search_ann3 minimize max_distance;
+solve minimize max_distance;
 

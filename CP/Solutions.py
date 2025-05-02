@@ -19,19 +19,27 @@ class Solutions:
             }
         self.data = None
 
+    def convert_solution(self, data):
+        out = []
+        max_v = len(data[0])
+        for elem in data:
+            out.append([i+1 for i, val in enumerate(elem) if val and not i>max_v-3])
+        return out
+
     def set_exec_time(self, time:int=0):
         self.solution[self.solver_type]["time"] = time
 
     def set_solution(self, data):
         self.data = data
-        if (self.solution['status'] == Status.UNSATISFIABLE or
-            self.solution['status'] == Status.UNKNOWN or
-            self.solution['status'] == Status.ERROR):
+        if (self.data['status'] == Status.UNSATISFIABLE or
+            self.data['status'] == Status.UNKNOWN or
+            self.data['status'] == Status.ERROR):
             self.set_failed_solution()
         self.solution[self.solver_type]["time"] = data["time"]//1
         self.solution[self.solver_type]["optimal"] = True if data['status'] == Status.OPTIMAL_SOLUTION else False
         self.solution[self.solver_type]["obj"] = data['max_distance']
-        self.solution[self.solver_type]["sol"] = data['edge_subset']
+
+        self.solution[self.solver_type]["sol"] = self.convert_solution(data['node_subset'])
 
     def set_failed_solution(self):
         self.failed = True

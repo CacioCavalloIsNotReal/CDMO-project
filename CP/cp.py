@@ -35,7 +35,7 @@ def cp_model(instance_file:str,
     solver_ins = Solver.lookup(solver)
     instance = Instance(solver_ins, cp_model)
     print(filename)
-    timedelta = datetime.timedelta(milliseconds=time_limit)
+    timedelta = datetime.timedelta(seconds=time_limit)
     try:
         #   ⚠⚠⚠ DANGER ZONE ⚠⚠⚠
         start_time = time.time()
