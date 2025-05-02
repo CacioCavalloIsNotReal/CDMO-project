@@ -7,6 +7,7 @@ RUN apt-get install -y wget
 RUN apt-get install -y python3-pip
 RUN apt-get install -y libgl1-mesa-dev
 RUN apt-get install -y libglib2.0-0
+RUN apt-get install -y libqt5printsupport5
 RUN apt-get install -y nano
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
