@@ -64,12 +64,15 @@ constraint symmetry_breaking_constraint(
   )
 );
 
-constraint max_distance = max(courier_distances);
+constraint max_distance = courier_distances[1]; % max(courier_distances);
 
-solve minimize max_distance;
+% Search annotations
+ann: search_ann1 = int_search(node_subset, input_order, indomain_min);
+ann: search_ann2 = int_search(node_subset, input_order, indomain_random);
+ann: search_ann3 = int_search(node_subset, first_fail, indomain_min);
+ann: search_ann4 = int_search(node_subset, first_fail, indomain_random);
+ann: search_ann5 = int_search(node_subset, dom_w_deg, indomain_min); 
+ann: search_ann6 = int_search(node_subset, dom_w_deg, indomain_random); 
 
-output [
-  "Nodi nel cammino: ", show(node_subset), "\n",
-  "Archi nel cammino: ", show(edge_subset), "\n",
-  "Peso totale: ", show(max_distance)
-];
+solve :: search_ann3  minimize max_distance;
+

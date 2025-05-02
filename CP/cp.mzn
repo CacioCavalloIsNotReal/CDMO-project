@@ -62,9 +62,3 @@ constraint forall(j in 1..M)(  % each courier can't exceed its maximum load rati
 constraint max_distance = max(courier_distances);
 
 solve minimize max_distance;
-
-output [
-  "Nodi nel cammino: ", show(node_subset), "\n",
-  "Archi nel cammino: ", show(edge_subset), "\n",
-  "Peso totale: ", show(max_distance)
-];

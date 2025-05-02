@@ -39,12 +39,20 @@ def cp_model(instance_file:str,
         #   ⚠⚠⚠ DANGER ZONE ⚠⚠⚠
         start_time = time.time()
         result = instance.solve(timeout=timedelta,
-                                intermediate_solutions=True,
-                                verbose=True)
+                                intermediate_solutions=False,
+                                verbose=False)
         total_time = time.time() - start_time
         if result.solution:
+            data = {'max_distance'      :result['max_distance'],
+                    'courier_distances' :result['courier_distances'],
+                    'node_subset'       :result['node_subset'],
+                    'edge_subset'       :result['edge_subset'],
+                    'current_load'      :result['current_load'],
+                    'status'            :result.status  # OPTIMAL_SOLUTION, SATISFIED, UNSATISFIABLE, UNKNOWN, ALL_SOLUTIONS
+                    }
+            
             current_solution.set_exec_time(total_time)
-            current_solution.set_solution(result)
+            current_solution.set_solution(data)
         else:
             current_solution.set_failed_solution()
 
