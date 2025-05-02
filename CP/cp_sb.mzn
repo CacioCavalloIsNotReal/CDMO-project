@@ -29,18 +29,18 @@ constraint endpoint = N;     % there each path end
 % to a node t with weight k
 % ns, es subset of nodes representing the path
 constraint forall(i in 1..M)(   % for each courier evaluate bounded_dpath
-    bounded_dpath(  % doc: https://docs.minizinc.dev/en/stable/lib-globals-graph.html
-        N,
-        E,
-        FROM,
-        TO,
-        W,
-        start,
-        endpoint,
-        [node_subset[i, j] | j in 1..N],
-        [edge_subset[i, j] | j in 1..E],
-        courier_distances[i]
-    )
+  bounded_dpath(  % doc: https://docs.minizinc.dev/en/stable/lib-globals-graph.html
+    N,
+    E,
+    FROM,
+    TO,
+    W,
+    start,
+    endpoint,
+    [node_subset[i, j] | j in 1..N],
+    [edge_subset[i, j] | j in 1..E],
+    courier_distances[i]
+  )
 );
 
 constraint forall(j in 1..N-2)( % each node is visited once
@@ -74,5 +74,5 @@ ann: search_ann4 = int_search(node_subset, first_fail, indomain_random);
 ann: search_ann5 = int_search(node_subset, dom_w_deg, indomain_min); 
 ann: search_ann6 = int_search(node_subset, dom_w_deg, indomain_random); 
 
-solve :: search_ann3  minimize max_distance;
+solve :: search_ann3 minimize max_distance;
 

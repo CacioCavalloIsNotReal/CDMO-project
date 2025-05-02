@@ -17,14 +17,15 @@ if debug:
 
 def cp_model(instance_file:str,
              solver:str = 'chuffed', # gecode   chuffed
-             time_limit:int=300000,
+             time_limit:int=Solutions.MAX_TIME,
              verbose = True,
              symm_break = False
             )->Solutions:
 
     module_path = os.path.dirname(os.path.realpath(__file__))
     filename = instance_file.split('/')[-1]
-    current_solution = Solutions(filename=filename)
+    name = solver if symm_break==False else f'SB_{solver}'
+    current_solution = Solutions(filename=filename, solver_type=name)
     if symm_break:
         cp_model = Model(module_path+'/cp_sb.mzn')
     else:
@@ -43,7 +44,8 @@ def cp_model(instance_file:str,
                                 verbose=False)
         total_time = time.time() - start_time
         if result.solution:
-            data = {'max_distance'      :result['max_distance'],
+            data = {'time'              :total_time,
+                    'max_distance'      :result['max_distance'],
                     'courier_distances' :result['courier_distances'],
                     'node_subset'       :result['node_subset'],
                     'edge_subset'       :result['edge_subset'],
