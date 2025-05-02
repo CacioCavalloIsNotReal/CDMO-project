@@ -6,15 +6,16 @@ from minizinc import Instance, Model, Solver, Status
 from CP.Solutions import *
 import time
 
-# print("Minizinc Python API version:", minizinc.__version__, '\n')
-# module_path = os.path.dirname(os.path.realpath(__file__))
-# print(module_path)
-if False:
+debug = False
+
+if debug:
     import logging
     logging.basicConfig(filename="minizinc-python.log", level=logging.DEBUG)
+    print("Minizinc Python API version:", minizinc.__version__, '\n')
+    module_path = os.path.dirname(os.path.realpath(__file__))
+    print(module_path)
 
 def cp_model(instance_file:str,
-             # solver:str = 'gecode', # gecode   chuffed
              solver:str = 'chuffed', # gecode   chuffed
              time_limit:int=300000,
              verbose = True,

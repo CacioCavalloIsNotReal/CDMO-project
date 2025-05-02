@@ -5,7 +5,7 @@ from tqdm import tqdm
      
 def run_cp():
     convert_files=False
-    solvers = ['gecode']#, 'chuffed']
+    solvers = ['gecode', 'chuffed']
 
     module_path = os.path.dirname(os.path.realpath(__file__))
     savepath = module_path+'/instances/'

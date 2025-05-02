@@ -1,4 +1,3 @@
-% loading ?
 include "globals.mzn";
 
 % pars
@@ -44,6 +43,10 @@ constraint forall(i in 1..M)(   % for each courier evaluate bounded_dpath
         [edge_subset[i, j] | j in 1..E],
         courier_distances[i]
     )
+);
+
+constraint forall(j in 1..N-2)( % each node is visited once
+  sum(i in 1..M)(bool2int(node_subset[i, j])) = 1
 );
 
 constraint forall(j in 1..M)(  % evaluate current load of each courier

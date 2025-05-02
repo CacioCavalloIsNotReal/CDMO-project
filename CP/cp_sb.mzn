@@ -1,4 +1,3 @@
-% loading ?
 include "globals.mzn";
 
 % pars
@@ -29,12 +28,10 @@ constraint endpoint = N;     % there each path end
 % it verify the existance of a path from a node s
 % to a node t with weight k
 % ns, es subset of nodes representing the path
-
-
 constraint forall(i in 1..M)(   % for each courier evaluate bounded_dpath
     bounded_dpath(  % doc: https://docs.minizinc.dev/en/stable/lib-globals-graph.html
         N,
-        E,% doc: https://docs.minizinc.dev/en/stable/lib-globals-graph.html
+        E,
         FROM,
         TO,
         W,
@@ -46,20 +43,25 @@ constraint forall(i in 1..M)(   % for each courier evaluate bounded_dpath
     )
 );
 
-constraint forall(j in 1..M)(  % evaluate current load of each courier
-  current_load[j] = sum(i in 1..N-2)(
-    node_subset[j,i]*S[i]
+constraint forall(j in 1..N-2)( % each node is visited once
+  sum(i in 1..M)(bool2int(node_subset[i, j])) = 1
+);
+
+constraint forall(i in 1..M)(  % evaluate current load for each courier
+  current_load[i] = sum(j in 1..N-2)(
+    node_subset[i,j]*S[j]
   )
 );
 
-constraint forall(j in 1..M)(  % each courier can't exceed its maximum load rating
-  current_load[j] <= L[j]
+constraint forall(i in 1..M)(  % each courier can't exceed its maximum load rating
+  current_load[i] <= L[i]
 );
 
 % symmetry breaking
-constraint forall(i in 1..M-1) (
-  lex_lesseq([bool2int(node_subset[i, j]) | j in 1..N],
-             [bool2int(node_subset[i+1, j]) | j in 1..N])
+constraint symmetry_breaking_constraint(
+  forall(i in 1..M-1)(
+    courier_distances[i] >= courier_distances[i+1]
+  )
 );
 
 constraint max_distance = max(courier_distances);
