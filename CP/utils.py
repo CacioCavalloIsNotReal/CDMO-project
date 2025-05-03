@@ -1,5 +1,6 @@
 from CP.CP_file_instance import *
 import numpy as np
+import json
 
 def read_raw_instances(path:str) -> CP_file_instance:
     filename = "".join(path.split('/')[-1].split('.')[:-1])
@@ -20,11 +21,15 @@ def read_raw_instances(path:str) -> CP_file_instance:
     instance = CP_file_instance(filename,m,n,l,s,d)
     return instance
 
-def save_solution():
+def save_solutions(output_dict, path):
     """
     file 1.json
         nome solver:...
         nome solver:...
     """
+    for filename in output_dict.keys():
+        result = output_dict[filename]
+        if len(result)==0: continue
+        with open(path+'/'+filename, 'w') as file:
+            json.dump(result, file, indent=4)
     
-    ...

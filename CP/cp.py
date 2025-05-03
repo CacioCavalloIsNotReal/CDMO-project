@@ -27,14 +27,13 @@ def cp_model(instance_file:str,
     name = solver if symm_break==False else f'SB_{solver}'
     current_solution = Solutions(filename=filename, solver_type=name)
     if symm_break:
-        cp_model = Model(module_path+'/cp_sb.mzn')
+        cp_model = Model(module_path+'/cp_sb2.mzn')
     else:
         cp_model = Model(module_path+'/cp.mzn')
     cp_model.add_file(instance_file, parse_data=True)
 
     solver_ins = Solver.lookup(solver)
     instance = Instance(solver_ins, cp_model)
-    print(filename)
     timedelta = datetime.timedelta(seconds=time_limit)
     try:
         #   ⚠⚠⚠ DANGER ZONE ⚠⚠⚠
