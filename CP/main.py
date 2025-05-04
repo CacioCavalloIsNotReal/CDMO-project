@@ -24,8 +24,8 @@ def run_cp():
     dzn_names = os.listdir(savepath)    # list of dzn contained into CP/instances
     solutions = {name:[] for name in dzn_names}
 
-    # pbar = tqdm(dzn_names[:1])
-    pbar = tqdm(['inst01.dzn'])
+    pbar = tqdm(dzn_names)
+    # pbar = tqdm(['inst01.dzn'])
     for name in pbar:
         pbar.set_description(f"solving problem {name}")
         for solver in solvers:
