@@ -35,7 +35,7 @@ class Solutions:
             self.data['status'] == Status.UNKNOWN or
             self.data['status'] == Status.ERROR):
             self.set_failed_solution()
-        self.solution[self.solver_type]["time"] = data["time"]//1
+        self.solution[self.solver_type]["time"] = int(data["time"]) if data["time"]<300 else 300
         self.solution[self.solver_type]["optimal"] = True if data['status'] == Status.OPTIMAL_SOLUTION else False
         self.solution[self.solver_type]["obj"] = data['max_distance']
 

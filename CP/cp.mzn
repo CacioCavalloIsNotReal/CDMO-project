@@ -61,4 +61,14 @@ constraint forall(j in 1..M)(  % each courier can't exceed its maximum load rati
 
 constraint max_distance = max(courier_distances);
 
+% Search annotations
+ann: search_ann1 = int_search(node_subset, input_order, indomain_min);
+ann: search_ann2 = int_search(node_subset, input_order, indomain_random);
+ann: search_ann3 = int_search(node_subset, first_fail, indomain_min);
+ann: search_ann4 = int_search(node_subset, first_fail, indomain_random);
+ann: search_ann5 = int_search(node_subset, dom_w_deg, indomain_min); 
+ann: search_ann6 = int_search(node_subset, dom_w_deg, indomain_random); 
+
+% solve :: search_ann3 minimize max_distance;
 solve minimize max_distance;
+

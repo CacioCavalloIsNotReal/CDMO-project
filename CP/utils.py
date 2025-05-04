@@ -29,7 +29,13 @@ def save_solutions(output_dict, path):
     """
     for filename in output_dict.keys():
         result = output_dict[filename]
-        if len(result)==0: continue
-        with open(path+'/'+filename, 'w') as file:
-            json.dump(result, file, indent=4)
+        # if len(result)==0: continue
+        # with open(path+'/'+filename, 'w') as file:
+        #     json.dump(result, file, indent=4)
+        save_result(result, path+'/'+filename)
+            
+def save_result(data, path):
+    if not len(data)==0:
+        with open(path, 'w') as file:
+            json.dump(data, file, indent=4)
     

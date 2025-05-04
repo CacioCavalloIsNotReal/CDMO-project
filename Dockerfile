@@ -7,7 +7,7 @@ RUN apt-get install -y wget
 RUN apt-get install -y python3-pip
 RUN apt-get install -y libgl1-mesa-dev
 RUN apt-get install -y libglib2.0-0
-RUN apt-get install -y libqt5printsupport5
+RUN apt-get update && apt-get install -y libqt5printsupport5
 RUN apt-get install -y nano
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -38,6 +38,7 @@ RUN tar -xvzf HiGHSstatic.v1.10.0.x86_64-linux-gnu-cxx11.tar.gz -C /opt/highs
 # Add minizinc and highs to PATH
 ENV PATH="/opt/minizinc/bin:$PATH"
 ENV PATH="/opt/highs/bin:$PATH"
+ENV PATH="/opt/minizinc/lib:$PATH"
 
 # Verify installation
 RUN minizinc --version
@@ -49,3 +50,4 @@ CMD ["python", "/cdmo/app.py"]
 # docker build -t cdmo-project .
 # docker run -it cdmo-project bash
 # docker run -it --rm -v /home/francesco/Scrivania/CDMO/repo/CDMO-project/:/cdmo cdmo-proj-image
+# docker run -it --rm -v /home/francesco/Scrivania/CDMO/repo/CDMO-project/:/cdmo cdmo-project bash

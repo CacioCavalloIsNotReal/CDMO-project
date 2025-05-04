@@ -59,12 +59,16 @@ constraint forall(i in 1..M)(  % each courier can't exceed its maximum load rati
 
 % symmetry breaking
 constraint symmetry_breaking_constraint(
-  forall(i in 1..M-1)(
-    courier_distances[i] >= courier_distances[i+1]
-  )
+  forall(i in 1..M-1, j in i..M
+    where L[i] == L[j])(  % want to lexicographically order only equivalent couriers
+      lex_lesseq(
+        [node_subset[i, k] | k in 1..N],
+        [node_subset[j, k] | k in 1..N],
+      )
+    )
 );
 
-constraint max_distance = courier_distances[1]; % max(courier_distances);
+constraint max_distance = max(courier_distances);
 
 % Search annotations
 ann: search_ann1 = int_search(node_subset, input_order, indomain_min);

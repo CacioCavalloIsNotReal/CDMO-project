@@ -4,7 +4,7 @@ from CP.cp import *
 from tqdm import tqdm
      
 def run_cp():
-    convert_files=False
+    convert_files=True
     solvers = ['gecode', 'chuffed']
     symm_break = [True, False]
 
@@ -19,20 +19,25 @@ def run_cp():
             path = instances_path+'/'+name
             istc = read_raw_instances(path)
             cp_path = istc.to_file(savepath, raw=False)
-    
+
+    outpath = "/".join(module_path.split('/')[:-1]+['res', 'CP'])
     dzn_names = os.listdir(savepath)    # list of dzn contained into CP/instances
     solutions = {name:[] for name in dzn_names}
-    for name in tqdm(dzn_names[:1]):
+
+    # pbar = tqdm(dzn_names[:1])
+    pbar = tqdm(['inst01.dzn'])
+    for name in pbar:
+        pbar.set_description(f"solving problem {name}")
         for solver in solvers:
             for sb in symm_break:
                 path = savepath+'/'+name
                 solutions[name].append(cp_model(path,
-                                                verbose=False, 
+                                                verbose=True, 
                                                 symm_break=sb, 
                                                 solver=solver
                                                 ).get_solution()) 
-    outpath = "/".join(module_path.split('/')[:-1]+['res', 'CP'])
-    save_solutions(solutions, outpath)
+        save_result(solutions[name], outpath+'/'+'.'.join(name.split('.')[:-1]+['json']))
+    # save_solutions(solutions, outpath)
     print("execution ended correctly")
 
 if __name__ == '__main__':
