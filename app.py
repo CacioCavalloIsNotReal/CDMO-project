@@ -1,5 +1,5 @@
-from MIP import run as mip_run
-from CP import main as cp_run
+from MIP.run import run_mip
+from CP.main import run_cp
 
 # Choose what to run
 
@@ -14,11 +14,9 @@ if __name__ == "__main__":
         print("Invalid choice. Please choose 'CP', 'MIP', or 'SMT'.")
         exit(1)
     elif approach == "cp":
-        cp_run.run_cp()
-        # print("CP approach is not implemented yet.")
-        # exit(1)
+        run_cp()
     elif approach == "mip":
-        mip_run.run_mip()
+        run_mip()
     elif approach == "smt":
         print("SMT approach is not implemented yet.")
         exit(1)

@@ -1,5 +1,5 @@
-from MIP import mip_model as model
-from MIP import mip_utils as utils
+from .mip_model import solve_mcp_mip
+from .mip_utils import parse_instance, write_output, combine_results
 import os
 
 INSTANCES_PATH = "instances"
@@ -48,9 +48,9 @@ def choose_instance():
 
 def run_solver(instance_path, solver_name, symbreak):
     """Runs the solver on the given instance."""
-    params = utils.parse_instance(instance_path)
+    params = parse_instance(instance_path)
 
-    return model.solve_mcp_mip(
+    return solve_mcp_mip(
         params=params,
         solver=solver_name,
         time_limit_sec=300,  # Set a time limit of 10 minutes
@@ -85,7 +85,7 @@ def run_mip():
                 
                 # Write results to file
                 output_path = os.path.join(results_dir, f"{instance_name}.json")
-                utils.write_output(results, output_path, solver_name)
+                write_output(results, output_path, solver_name)
     
     else:
         print("Running on a single instance...")
@@ -100,9 +100,9 @@ def run_mip():
         # Write results to file
         print(f"Writing results to {results_dir}...")
         output_path = os.path.join(results_dir, instance_name + ".json")
-        utils.write_output(results, output_path, solver_name)
+        write_output(results, output_path, solver_name)
 
-    utils.combine_results(
+    combine_results(
         result_nosymbreak_dir="./MIP/result_nosymbreak",
         result_symbreak_dir="./MIP/result_symbreak",
     )
