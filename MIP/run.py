@@ -1,5 +1,5 @@
-import mip_model as model
-import mip_utils as utils
+from MIP import mip_model as model
+from MIP import mip_utils as utils
 import os
 
 INSTANCES_PATH = "instances"

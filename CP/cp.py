@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 import minizinc
 from minizinc import Instance, Model, Solver, Status
-from Solutions import *
+from .Solutions import *
 import time
 
 # print("Minizinc Python API version:", minizinc.__version__, '\n')

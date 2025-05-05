@@ -1,6 +1,6 @@
 from CP.utils import read_raw_instances
-from CP_file_instance import *
-from cp import *
+from .CP_file_instance import *
+from .cp import *
 from tqdm import tqdm
 
 def run_cp():
