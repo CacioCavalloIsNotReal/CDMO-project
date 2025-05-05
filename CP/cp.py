@@ -49,6 +49,7 @@ def cp_model(instance_file:str,
                     'node_subset'       :result['node_subset'],
                     'edge_subset'       :result['edge_subset'],
                     'current_load'      :result['current_load'],
+                    'path'              :result['path'],
                     'status'            :result.status  # OPTIMAL_SOLUTION, SATISFIED, UNSATISFIABLE, UNKNOWN, ALL_SOLUTIONS
                     }
             

@@ -5,3 +5,4 @@ tqdm
 pulp
 highspy
 gurobipy
+networkx[default]

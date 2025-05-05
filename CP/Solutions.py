@@ -1,4 +1,5 @@
 import math
+import numpy as np
 from minizinc import Status
 
 class Solutions:
@@ -20,10 +21,24 @@ class Solutions:
         self.data = None
 
     def convert_solution(self, data):
+        # out = []
+        # # max_v = len(data[0])
+        # # for elem in data:
+        # #     out.append([i+1 for i, val in enumerate(elem) if val and not i>max_v-3])    
+        # #     # out.append([max_v-i for i, val in enumerate(elem[::-1]) if val and i>1])
+
+        data = np.array(data)
         out = []
-        max_v = len(data[0])
-        for elem in data:
-            out.append([i+1 for i, val in enumerate(elem) if val and not i>max_v-3])
+
+        for row in data:
+            row = np.array(row)
+            max_val = np.max(row)
+
+            valid_indices = [i for i, val in enumerate(row) if val > 1 and val < max_val]
+            
+            sorted_indices = sorted(valid_indices, key=lambda i: row[i])
+            out.append([valore +1 for valore in sorted_indices])
+
         return out
 
     def set_exec_time(self, time:int=0):
@@ -39,7 +54,7 @@ class Solutions:
         self.solution[self.solver_type]["optimal"] = True if data['status'] == Status.OPTIMAL_SOLUTION else False
         self.solution[self.solver_type]["obj"] = data['max_distance']
 
-        self.solution[self.solver_type]["sol"] = self.convert_solution(data['node_subset'])
+        self.solution[self.solver_type]["sol"] = self.convert_solution(data['path'])
 
     def set_failed_solution(self):
         self.failed = True

@@ -1,3 +1,7 @@
+import numpy as np
+import networkx as nx
+import json 
+
 class CP_file_instance:
     def __init__(self, filename, m, n, l, s, d):
         self.filename=filename
@@ -5,7 +9,7 @@ class CP_file_instance:
         self.n = n  # n. items
         self.l = l  # courier load
         self.s = s  # item size and endpoint
-        self.d = d  # manhattan distance matrix
+        self.d = np.array(d)  # manhattan distance matrix
         self.generate_graph()
 
     def __repr__(self):
@@ -17,53 +21,44 @@ class CP_file_instance:
         G=(V,E)
 
         """
-        n_nodes = self.n
-        start = n_nodes+1
-        end = n_nodes+2
+        tmp_d = np.vstack([self.d, self.d[-1,:]])
+        tmp_d = np.hstack([tmp_d, tmp_d[:, -1].reshape(-1, 1)]) # nb the square on the bottom right corner means you can't go from start to end, thats why its all 0
 
-        self.edges = []
-        for i in [start]+list(range(1, start)):
-            for j in range(1, end+1):
-                if j!=start and (i,j)!=(start,end) and i!=j:
-                    self.edges.append((i,j))
+        start = tmp_d.shape[0]-2 # eg. 9x9, 9-2=7
 
-        self.weights = []
-        for edge in self.edges:
-            if edge[1]!=end:
-                self.weights.append(self.d[edge[0]-1][edge[1]-1])
-            else:
-                self.weights.append(self.d[edge[0]-1][start-1])
+        G = nx.from_numpy_array(tmp_d, create_using=nx.DiGraph) # created the directed, weighted graph
+        to_be_removed = [(u, v)
+                         for u, v in G.edges 
+                         if     u==start+1    # cant start from the end
+                            or  v==start      # we do not want to go back to the starting poing
+                            or  u==v]        # can't stay in the same place
+        
+        G.remove_edges_from(to_be_removed)
 
+        self.graph = G
+        self.edges = G.edges
+
+        edges_array = np.array(G.edges).T
+
+        self.e_from = edges_array[0]+1 # indexes strat from 1 
+        self.e_to   = edges_array[1]+1
+
+        self.weights = [G[u][v]['weight'] for u, v in G.edges ]
+        
     def get_graph(self):
         return self.edges, self.weights
 
-    def to_file(self, path, raw=False):
+    def to_file(self, path):
         out_path = "".join([path, self.filename, '.dzn'])
-        if raw:
-            with open(out_path, 'w') as f:
-                f.write('M = %d;\n' % self.m)
-                f.write('N = %d;\n' % self.n)
-                f.write('L = [' + ', '.join(map(str, self.l)) + '];\n')
-                f.write('S = [' + ', '.join(f'{size}' for size in self.s) + '];\n')
-                f.write('D = [')
-                for row in self.d:
-                    f.write('|' + ','.join(map(str, row)) + '\n')
-                f.write('|];\n')
-            return out_path
-        else:
-            e, w = self.get_graph()
 
-            _from = [i for i, j in e]
-            _to = [j for i, j in e]
-
-            with open(out_path, 'w') as f:
-                f.write('M = %d;\n' % self.m)
-                f.write('N = %d;\n' % (self.n+2))
-                f.write('L = [' + ', '.join(map(str, self.l)) + '];\n')
-                f.write('E = %d;\n' % (self.n**2 + self.n))
-                f.write('S = [' + ', '.join(f'{size}' for size in self.s) + '];\n')
-                f.write('FROM = %s;\n' % str(_from))
-                f.write('TO = %s;\n' % str(_to))
-                f.write('W = %s;\n' % str(w))
-            return out_path
-
+        with open(out_path, 'w') as f:
+            f.write('M = %d;\n' % self.m)
+            f.write('N = %d;\n' % (self.n+2))
+            f.write('L = [' + ', '.join(map(str, self.l)) + '];\n')
+            f.write('E = %d;\n' % (len(self.e_from)))# (self.n**2 + self.n))
+            f.write('S = [' + ', '.join(f'{size}' for size in self.s) + '];\n')
+            
+            f.write('FROM = %s;\n' % json.dumps(self.e_from.tolist()))
+            f.write('TO = %s;\n' % json.dumps(self.e_to.tolist()))
+            f.write('W = %s;\n' % json.dumps(self.weights))
+        return out_path
