@@ -1,4 +1,4 @@
-import model_symbreak as model
+import mip_model as model
 import mip_utils as utils
 import os
 
@@ -102,3 +102,7 @@ def run_mip():
         output_path = os.path.join(results_dir, instance_name + ".json")
         utils.write_output(results, output_path, solver_name)
 
+    utils.combine_results(
+        result_nosymbreak_dir="./MIP/result_nosymbreak",
+        result_symbreak_dir="./MIP/result_symbreak",
+    )

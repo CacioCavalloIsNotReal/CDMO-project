@@ -25,3 +25,4 @@ if __name__ == "__main__":
     elif approach == "smt":
         print("SMT approach is not implemented yet.")
         exit(1)
+    

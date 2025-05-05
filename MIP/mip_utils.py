@@ -68,3 +68,60 @@ def write_output(results, output_path, approach_name="mip_pulp"): # Allow custom
         print(f"Results written to {output_path}")
     except Exception as e:
         print(f"Error writing output file {output_path}: {e}", file=sys.stderr)
+
+def combine_results(result_nosymbreak_dir, result_symbreak_dir):
+    combined_results = {}
+    for subfolder in os.listdir(result_nosymbreak_dir):
+        if subfolder.startswith('.'):
+            # Skip hidden folders.
+            continue
+        folder = os.path.join(result_nosymbreak_dir, subfolder)
+        for results_file in sorted(os.listdir(folder)):
+            if results_file.startswith('.'):
+                # Skip hidden folders.
+                continue
+            if results_file not in combined_results.keys():
+                combined_results[results_file] = {}
+            
+            results = json.load(open(os.path.join(folder, results_file)))
+            if 'PULP_CBC_CMD' in results.keys():
+                updated_results = {'cbc': results['PULP_CBC_CMD']}
+            elif 'GUROBI_CMD' in results.keys():
+                updated_results = {'gurobi': results['GUROBI_CMD']}
+            elif 'HiGHS_CMD' in results.keys():
+                updated_results = {'highs': results['HiGHS_CMD']}
+            else:
+                print("ERROR")
+
+            combined_results[results_file].update(updated_results)
+    for subfolder in os.listdir(result_symbreak_dir):
+        if subfolder.startswith('.'):
+            # Skip hidden folders.
+            continue
+        folder = os.path.join(result_symbreak_dir, subfolder)
+        for results_file in sorted(os.listdir(folder)):
+            if results_file.startswith('.'):
+                # Skip hidden folders.
+                continue
+            if results_file not in combined_results.keys():
+                combined_results[results_file] = {}
+
+            results = json.load(open(os.path.join(folder, results_file)))
+            if 'PULP_CBC_CMD' in results.keys():
+                updated_results = {'cbc_symbreak': results['PULP_CBC_CMD']}
+            elif 'GUROBI_CMD' in results.keys():
+                updated_results = {'gurobi_symbreak': results['GUROBI_CMD']}
+            elif 'HiGHS_CMD' in results.keys():
+                updated_results = {'highs_symbreak': results['HiGHS_CMD']}
+            else:
+                print("ERROR")
+
+            combined_results[results_file].update(updated_results)
+
+    os.makedirs("res/MIP", exist_ok=True)
+
+    for file_name, result in combined_results.items():
+        output_path = os.path.join("res/MIP", file_name)
+        with open(output_path, 'w') as f:
+            json.dump(result, f, indent=4)
+        print(f"Combined results written to {output_path}")
