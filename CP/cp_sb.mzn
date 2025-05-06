@@ -74,32 +74,28 @@ constraint max_distance = max(courier_distances);
 % **************************this part reconstruct the ORDER OF THE PATH***************************
 % ************************************************************************************************
 array[1..M, 1..N] of var 0..N: path; 
-array[1..M] of var int: courier_path_weight;
+% array[1..M] of var int: courier_path_weight;
 
 constraint forall(i in 1..M)(
-  path[i, N-1]=1                               /\  % forces the start to be 1
-  path[i, N]=sum(row(node_subset,i))           /\  % forces the end to be sum(node_subset) (n of items the courier is transporting)
-  forall(j in 1..N where(node_subset[i, j]))(      % forces path[i,j] under consideration (if node_subset[i, j] is true) to be:
-    path[i, j]>0 /\                                    % bigger than 0 -> alldiff constrain 
+  path[i, N-1]=1 /\                                 % forces the start to be 1 (first point to be seen)
+  path[i, N]=sum(row(node_subset,i)) /\             % forces the end to be sum(node_subset) (n of items the courier is transporting)
+  forall(j in 1..N where(node_subset[i, j]))(       % forces path[i,j] under consideration (if node_subset[i, j] is true) to be:
+    path[i, j]>0 /\                                    % bigger than 0 -> courier cross the point  
     path[i, j]<=sum(row(node_subset,i))                % lower than the n of items the courier is transporting
   ) /\
   alldifferent(
-    [path[i, j] | j in 1..N where(path[i, j]!=0)]  % each value which is not 0 (so the courier cross that point) must be different from 0
+    [path[i, j] | j in 1..N where(path[i, j]!=0)]  % each value which is not 0 (so the courier cross that point) must be different
   ) 
 );
 
 constraint forall(i in 1..M)(
-   courier_path_weight[i] = sum(         % impose the order
+   courier_distances[i] = sum(         % impose the order
       j in 1..sum(row(node_subset,i))-1,   % n. of items that must be transported, j= 1, 2, ... |node_subset|-1
       k in 1..E                            % index
      where                               % reconstruct the trajectory
         path[i, FROM[k] ]=j    /\
         path[i, TO[k]   ]=j+1 
     )(W[k])  % sum of weights visited in a certain order
-);
-
-constraint forall(i in 1..M)(
-  courier_path_weight[i] <= max_distance  % the constrain that force the order of nodes
 );
 
 % Search annotations

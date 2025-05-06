@@ -25,7 +25,7 @@ def run_cp():
     solutions = {name:{} for name in dzn_names}
 
     pbar = tqdm(dzn_names)
-    # pbar = tqdm(['inst01.dzn','inst03.dzn',])
+    # pbar = tqdm(['inst01.dzn','inst03.dzn','inst07.dzn'])
     for name in pbar:
         pbar.set_description(f"solving problem {name}")
         for solver in solvers:
