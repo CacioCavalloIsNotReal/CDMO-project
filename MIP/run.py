@@ -4,7 +4,6 @@ import os
 
 INSTANCES_PATH = "instances"
 
-
 def choose_solver():
     solver_name = input("Please enter the solver you want to use: ").upper()
     match solver_name:
@@ -65,6 +64,8 @@ def run_mip():
     solver_name = choose_solver()
     symbreak = choose_symbreak()
 
+    os.makedirs("./MIP/result_symbreak", exist_ok=True)
+    os.makedirs("./MIP/result_nosymbreak", exist_ok=True)
     if symbreak:
         results_dir = os.path.join("./MIP/result_symbreak", solver_name)
     else:
