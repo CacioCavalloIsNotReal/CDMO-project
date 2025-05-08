@@ -1,6 +1,9 @@
 from MIP.run import run_mip
 from CP.main import run_cp
 
+# THIS IS JUST FOR TESTING PURPOSES
+from SMT.smt_model import solve_mcp_smt
+from MIP.mip_utils import parse_instance
 # Choose what to run
 
 if __name__ == "__main__":
@@ -18,6 +21,9 @@ if __name__ == "__main__":
     elif approach == "mip":
         run_mip()
     elif approach == "smt":
-        print("SMT approach is not implemented yet.")
-        exit(1)
+        instance = input("instance name: ")
+        instance = parse_instance("instances/" + instance + ".dat")
+        solve_mcp_smt(instance)
+        # print("SMT approach is not implemented yet.")
+        # exit(1)
     

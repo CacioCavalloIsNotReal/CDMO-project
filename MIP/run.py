@@ -65,6 +65,9 @@ def run_mip():
     solver_name = choose_solver()
     symbreak = choose_symbreak()
 
+    os.makedirs("./MIP/result_symbreak", exist_ok=True)
+    os.makedirs("./MIP/result_nosymbreak", exist_ok=True)
+    
     if symbreak:
         results_dir = os.path.join("./MIP/result_symbreak", solver_name)
     else:
