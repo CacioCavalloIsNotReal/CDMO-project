@@ -16,8 +16,8 @@ var int: start;
 var int: endpoint;
 var int: max_distance;
 array [1..M] of var int: courier_distances;
-array [1..M, 1..N] of var bool: node_subset;  % subset of nodes for each courier
-array [1..M, 1..E] of var bool: edge_subset;  % subset of edges for each courier
+array [1..M, 1..N] of var bool: node_subset;
+array [1..M, 1..E] of var bool: edge_subset;
 
 array [1..M] of var int: current_load;
 
@@ -28,21 +28,19 @@ constraint endpoint = N;     % there each path end
 % it verify the existance of a path from a node s
 % to a node t with weight k
 % ns, es subset of nodes representing the path
-
-
 constraint forall(i in 1..M)(   % for each courier evaluate bounded_dpath
-    bounded_dpath(  % doc: https://docs.minizinc.dev/en/stable/lib-globals-graph.html
-        N,
-        E,
-        FROM,
-        TO,
-        W,
-        start,
-        endpoint,
-        row(node_subset, i),
-        row(edge_subset, i),
-        courier_distances[i]
-    )
+  bounded_dpath(  % doc: https://docs.minizinc.dev/en/stable/lib-globals-graph.html
+    N,
+    E,
+    FROM,
+    TO,
+    W,
+    start,
+    endpoint,
+    row(node_subset, i),
+    row(edge_subset, i),
+    courier_distances[i]
+  )
 );
 
 constraint forall(j in 1..N where(j!=start /\ j!= endpoint))( % each node is visited once
@@ -57,6 +55,17 @@ constraint forall(j in 1..M)(  % evaluate current load of each courier
 
 constraint forall(j in 1..M)(  % each courier can't exceed its maximum load rating
   current_load[j] < L[j]+1
+);
+
+% symmetry breaking
+constraint symmetry_breaking_constraint(
+  forall(i in 1..M-1, j in i+1..M
+    where L[i] == L[j])(  % want to lexicographically order only equivalent couriers
+      lex_lesseq(
+        [node_subset[i, k] | k in 1..N],
+        [node_subset[j, k] | k in 1..N],
+      )
+    )
 );
 
 constraint max_distance = max(courier_distances);
@@ -75,7 +84,7 @@ constraint forall(i in 1..M)(
     path[i, j]<=sum(row(node_subset,i))                % lower than the n of items the courier is transporting
   ) /\
   alldifferent(
-    [path[i, j] | j in 1..N where(path[i, j]!=0)]  % each value which is not 0 (so the courier cross that point) must be differentcourier_distances
+    [path[i, j] | j in 1..N where(path[i, j]!=0)]  % each value which is not 0 (so the courier cross that point) must be different
   ) 
 );
 
@@ -99,3 +108,4 @@ ann: search_ann6 = int_search(node_subset, dom_w_deg, indomain_random);
 
 solve :: search_ann3 minimize max_distance;
 % solve minimize max_distance;
+
