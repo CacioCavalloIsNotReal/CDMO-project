@@ -11,7 +11,7 @@ if __name__ == "__main__":
     instance = sys.argv[4]
     
     if approach == "cp":
-        execute_cp(solver, symbreak, instance)
+        execute_cp(instance, solver, symbreak)
     if approach == "mip":
         # EXAMPLE: python main.py mip gurobi False 1
         execute_mip(solver, symbreak, instance)
