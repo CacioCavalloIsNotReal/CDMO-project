@@ -20,12 +20,15 @@ def choose_instance(instance_name):
         instance = f"inst0{instance_name}.dat"
     return instance
 
-def execute_mip(solver_name, symbreak, instance_name):
-    
+def execute_mip(instance_name: str, solver_name: str = 'highs', symbreak: bool = False):
     if instance_name == "all":
         print("Running on all instances...")
         for i in range(len(os.listdir(INSTANCES_DIR))):
-            execute_mip(solver_name, symbreak, str(i + 1))
+            execute_mip(
+                solver_name=solver_name, 
+                symbreak=symbreak, 
+                instance_name=str(i + 1)
+                )
 
     else:
         print(f"Running on instance {instance_name}...")
@@ -37,9 +40,9 @@ def execute_mip(solver_name, symbreak, instance_name):
         os.makedirs("./MIP/result_nosymbreak", exist_ok=True)
         
         if symbreak:
-            results_dir = os.path.join("./MIP/result_nosymbreak", solver_name)
-        else:
             results_dir = os.path.join("./MIP/result_symbreak", solver_name)
+        else:
+            results_dir = os.path.join("./MIP/result_nosymbreak", solver_name)
 
         solution = solve_mcp_mip(
             params=params,
@@ -48,5 +51,10 @@ def execute_mip(solver_name, symbreak, instance_name):
             add_symmetry_break=symbreak,
         )
 
-        output_path = os.path.join(results_dir, f"{instance_name}.json")
+        output_path = os.path.join(results_dir, f"{'.'.join(instance.split('.')[:-1])}.json")
         write_output(solution, output_path, solver_name)
+    
+    combine_results(
+        result_nosymbreak_dir="./MIP/result_nosymbreak",
+        result_symbreak_dir="./MIP/result_symbreak"
+    )

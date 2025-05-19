@@ -83,13 +83,14 @@ def combine_results(result_nosymbreak_dir, result_symbreak_dir):
             if results_file not in combined_results.keys():
                 combined_results[results_file] = {}
             
+            updated_results = {}
             results = json.load(open(os.path.join(folder, results_file)))
-            if 'PULP_CBC_CMD' in results.keys():
-                updated_results = {'cbc': results['PULP_CBC_CMD']}
-            elif 'GUROBI_CMD' in results.keys():
-                updated_results = {'gurobi': results['GUROBI_CMD']}
-            elif 'HiGHS_CMD' in results.keys():
-                updated_results = {'highs': results['HiGHS_CMD']}
+            if 'cbc' in results.keys():
+                updated_results = {'cbc': results['cbc']}
+            elif 'gurobi' in results.keys():
+                updated_results = {'gurobi': results['gurobi']}
+            elif 'highs' in results.keys():
+                updated_results = {'highs': results['highs']}
             else:
                 print("ERROR")
 
@@ -106,13 +107,14 @@ def combine_results(result_nosymbreak_dir, result_symbreak_dir):
             if results_file not in combined_results.keys():
                 combined_results[results_file] = {}
 
+            updated_results = {}
             results = json.load(open(os.path.join(folder, results_file)))
-            if 'PULP_CBC_CMD' in results.keys():
-                updated_results = {'cbc_symbreak': results['PULP_CBC_CMD']}
-            elif 'GUROBI_CMD' in results.keys():
-                updated_results = {'gurobi_symbreak': results['GUROBI_CMD']}
-            elif 'HiGHS_CMD' in results.keys():
-                updated_results = {'highs_symbreak': results['HiGHS_CMD']}
+            if 'cbc' in results.keys():
+                updated_results = {'cbc_symbreak': results['cbc']}
+            elif 'gurobi' in results.keys():
+                updated_results = {'gurobi_symbreak': results['gurobi']}
+            elif 'highs' in results.keys():
+                updated_results = {'highs_symbreak': results['highs']}
             else:
                 print("ERROR")
 

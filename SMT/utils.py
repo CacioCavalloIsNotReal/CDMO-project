@@ -2,6 +2,8 @@ import numpy as np
 import threading
 import queue # Per recuperare i risultati dal thread in modo sicuro
 import time
+import json
+import os
 from z3 import Z3Exception
 
 def read_raw_instances(path:str):
@@ -143,3 +145,22 @@ def run_z3_with_external_timeout(external_timeout_seconds, model_func, *args, **
                 'time': actual_execution_time,
                 'error': 'Worker thread finished but no result was found in the queue.'
             }
+        
+
+# def write_output(results, path):
+#     os.makedirs(os.path.dirname(path), exist_ok=True)
+#     with open(path, 'w') as f:
+#         output_data = {"z3": results}
+#         json.dump(output_data, f, indent=4)
+
+
+def write_output(results, output_path): # Allow customizing approach name
+    """Writes the results to a JSON file."""
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    try:
+        with open(output_path, 'w') as f:
+            output_data = {"z3": results}
+            json.dump(output_data, f, indent=4)
+        print(f"Results written to {output_path}")
+    except Exception as e:
+        print(f"Error writing output file {output_path}: {e}", file=sys.stderr)
