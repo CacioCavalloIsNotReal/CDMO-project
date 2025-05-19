@@ -15,7 +15,7 @@ array [1..E] of int: W;     % weight of the link FROM[i] -> TO[i]
 var int: start;
 var int: endpoint;
 var int: max_distance;
-array [1..M] of var int: courier_distances;
+array [1..M] of var int: courier_distances_dpath;
 array [1..M, 1..N] of var bool: node_subset;  % subset of nodes for each courier
 array [1..M, 1..E] of var bool: edge_subset;  % subset of edges for each courier
 
@@ -28,8 +28,6 @@ constraint endpoint = N;     % there each path end
 % it verify the existance of a path from a node s
 % to a node t with weight k
 % ns, es subset of nodes representing the path
-
-
 constraint forall(i in 1..M)(   % for each courier evaluate bounded_dpath
     bounded_dpath(  % doc: https://docs.minizinc.dev/en/stable/lib-globals-graph.html
         N,
@@ -41,7 +39,7 @@ constraint forall(i in 1..M)(   % for each courier evaluate bounded_dpath
         endpoint,
         row(node_subset, i),
         row(edge_subset, i),
-        courier_distances[i]
+        courier_distances_dpath[i]
     )
 );
 
@@ -59,20 +57,21 @@ constraint forall(j in 1..M)(  % each courier can't exceed its maximum load rati
   current_load[j] < L[j]+1
 );
 
-constraint max_distance = max(courier_distances);
-
 % ************************************************************************************************
 % **************************this part reconstruct the ORDER OF THE PATH***************************
 % ************************************************************************************************
 array[1..M, 1..N] of var 0..N: path; 
-% array[1..M] of var int: courier_path_weight;
+array [1..M] of var int: courier_distances;
 
 constraint forall(i in 1..M)(
   path[i, N-1]=1 /\                                 % forces the start to be 1 (first point to be seen)
   path[i, N]=sum(row(node_subset,i)) /\             % forces the end to be sum(node_subset) (n of items the courier is transporting)
   forall(j in 1..N where(node_subset[i, j]))(       % forces path[i,j] under consideration (if node_subset[i, j] is true) to be:
     path[i, j]>0 /\                                    % bigger than 0 -> courier cross the point  
-    path[i, j]<=sum(row(node_subset,i))                % lower than the n of items the courier is transporting
+    path[i, j]<=path[i, N]                             % lower than the n of items the courier is transporting
+  ) /\
+  forall(j in 1..N where(not(node_subset[i, j])))(
+    path[i, j]=0
   ) /\
   alldifferent(
     [path[i, j] | j in 1..N where(path[i, j]!=0)]  % each value which is not 0 (so the courier cross that point) must be differentcourier_distances
@@ -80,22 +79,25 @@ constraint forall(i in 1..M)(
 );
 
 constraint forall(i in 1..M)(
-   courier_distances[i] = sum(         % impose the order
+  courier_distances[i] = sum(         % impose the order
       j in 1..sum(row(node_subset,i))-1,   % n. of items that must be transported, j= 1, 2, ... |node_subset|-1
       k in 1..E                            % index
-     where                               % reconstruct the trajectory
-        path[i, FROM[k] ]=j    /\
-        path[i, TO[k]   ]=j+1 
-    )(W[k])  % sum of weights visited in a certain order
+    where                               % reconstruct the trajectory
+      path[i, FROM[k] ]=j    /\
+      path[i, TO[k]   ]=j+1 
+  )(W[k]) /\ % sum of weights visited in a certain order
+  courier_distances[i]<=courier_distances_dpath[i]
 );
 
-% Search annotations
-ann: search_ann1 = int_search(node_subset, input_order, indomain_min);
-ann: search_ann2 = int_search(node_subset, input_order, indomain_random);
-ann: search_ann3 = int_search(node_subset, first_fail, indomain_min);
-ann: search_ann4 = int_search(node_subset, first_fail, indomain_random);
-ann: search_ann5 = int_search(node_subset, dom_w_deg, indomain_min); 
-ann: search_ann6 = int_search(node_subset, dom_w_deg, indomain_random); 
+constraint max_distance = max(courier_distances);
 
-solve :: search_ann3 minimize max_distance;
+% Search annotations
+ann: search_assignment = int_search(node_subset, first_fail, indomain_median); 
+ann: search_sequencing = int_search(path, first_fail, indomain_median); 
+ann: search_combined = seq_search([
+    search_assignment,  % first search an assignment here
+    search_sequencing   % then here
+]);
+% this makes sense as node_subset has a boolean domain, path has integers
+solve :: search_combined minimize max_distance;
 % solve minimize max_distance;
