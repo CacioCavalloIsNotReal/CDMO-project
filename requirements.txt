@@ -5,4 +5,5 @@ tqdm
 pulp
 highspy
 gurobipy
+networkx
 z3-solver
