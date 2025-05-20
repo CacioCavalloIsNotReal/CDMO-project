@@ -1,8 +1,8 @@
-from MIP.run import run_mip
+from old_stuff_to_remove.MIP.run import run_mip
 from CP.main import run_cp
 
 # THIS IS JUST FOR TESTING PURPOSES
-from SMT.smt_model import solve_mcp_smt
+from SMT.old_stuff_to_remove.smt_model import solve_mcp_smt
 from MIP.mip_utils import parse_instance
 # Choose what to run
 

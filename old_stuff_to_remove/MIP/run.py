@@ -1,5 +1,5 @@
-from .mip_model import solve_mcp_mip
-from .mip_utils import parse_instance, write_output, combine_results
+from ...MIP.mip_model import solve_mcp_mip
+from ...MIP.mip_utils import parse_instance, write_output, combine_results
 import os
 
 INSTANCES_PATH = "instances"

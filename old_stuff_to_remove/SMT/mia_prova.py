@@ -2,7 +2,7 @@ import numpy as np
 import os
 from tqdm import tqdm
 from utils import *
-from model import *
+from SMT.smt_model import *
 
 MAX_TIME = 5
 

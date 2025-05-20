@@ -17,16 +17,19 @@ if __name__ == "__main__":
             symbreak=symbreak,
             instance_name=instance
         )
+
     if approach == "mip":
         # EXAMPLE: python main.py mip gurobi False 1
+        # You can choose between gurobi, highs, and cbc
         execute_mip(
             solver_name=solver, 
             symbreak=symbreak, 
             instance_name=instance
             )
+        
     if approach == "smt":
         # EXAMPLE: python main.py smt z3 False 1
-        execute_smt(symbreak, instance)
+        # The only solver supported is z3
         execute_smt(
             symbreak=symbreak,
             instance_name=instance

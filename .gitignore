@@ -4,5 +4,6 @@ MIP/__pycache__/
 MIP/result_nosymbreak/
 MIP/result_symbreak/
 SMT/__pycache__/
-SMT/solutions/
+SMT/result_nosymbreak/
+SMT/result_symbreak/
 res

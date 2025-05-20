@@ -4,6 +4,7 @@ import queue # Per recuperare i risultati dal thread in modo sicuro
 import time
 import json
 import os
+import sys
 from z3 import Z3Exception
 
 def read_raw_instances(path:str):
@@ -146,14 +147,6 @@ def run_z3_with_external_timeout(external_timeout_seconds, model_func, *args, **
                 'error': 'Worker thread finished but no result was found in the queue.'
             }
         
-
-# def write_output(results, path):
-#     os.makedirs(os.path.dirname(path), exist_ok=True)
-#     with open(path, 'w') as f:
-#         output_data = {"z3": results}
-#         json.dump(output_data, f, indent=4)
-
-
 def write_output(results, output_path): # Allow customizing approach name
     """Writes the results to a JSON file."""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -164,3 +157,40 @@ def write_output(results, output_path): # Allow customizing approach name
         print(f"Results written to {output_path}")
     except Exception as e:
         print(f"Error writing output file {output_path}: {e}", file=sys.stderr)
+
+def combine_results(result_nosymbreak_dir, result_symbreak_dir):
+    
+    combined_results = {}
+    
+    for results_file in sorted(os.listdir(result_nosymbreak_dir)):
+        if results_file.startswith('.'):
+            # Skip hidden folders.
+            continue
+        if results_file not in combined_results.keys():
+            combined_results[results_file] = {}
+        
+        updated_results = {}
+        results = json.load(open(os.path.join(result_nosymbreak_dir, results_file)))
+        updated_results = {'z3': results['z3']}
+        combined_results[results_file].update(updated_results)
+    
+    for results_file in sorted(os.listdir(result_symbreak_dir)):
+        if results_file.startswith('.'):
+            # Skip hidden folders.
+            continue
+        if results_file not in combined_results.keys():
+            combined_results[results_file] = {}
+        
+        updated_results = {}
+        results = json.load(open(os.path.join(result_symbreak_dir, results_file)))
+        updated_results = {'z3_symbreak': results['z3']}
+        combined_results[results_file].update(updated_results)
+    
+    # Write combined results to a single JSON file
+    os.makedirs("res/SMT", exist_ok=True)
+
+    for file_name, result in combined_results.items():
+        output_path = os.path.join("res/SMT", file_name)
+        with open(output_path, 'w') as f:
+            json.dump(result, f, indent=4)
+        print(f"Combined results written to {output_path}")

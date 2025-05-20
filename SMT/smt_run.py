@@ -1,7 +1,7 @@
 import os
 from tqdm import tqdm
-from .utils import *
-from .model import *
+from .smt_utils import *
+from .smt_model import *
 
 MAX_TIME = 300
 
@@ -68,7 +68,8 @@ def execute_smt(symbreak: Bool = False, instance_name: str = "all"):
         else:
             write_output(result_dict, f'./SMT/result_nosymbreak/{filename}.json')
 
-
-if __name__=='__main__':
-    execute_smt(symbreak=False, instance_name="all")
-    # execute_smt(symbreak=False, instance_name="all")
+    combine_results(
+        result_nosymbreak_dir="./SMT/result_nosymbreak",
+        result_symbreak_dir="./SMT/result_symbreak"
+    )
+    
