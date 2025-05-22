@@ -1,8 +1,8 @@
 import numpy as np
 import os
 from tqdm import tqdm
-from utils import *
-from SMT.smt_model import *
+from smt_utils import *
+from smt_model import *
 
 MAX_TIME = 5
 
@@ -17,13 +17,16 @@ if __name__=='__main__':
     instances_folder =  "/".join(module_path.split('/')[:-1]+['instances'])
     file_names = sorted(os.listdir(instances_folder) )
 
-    pbar = tqdm(file_names[5:6])
+    pbar = tqdm(file_names[:1])
+    # pbar = tqdm(file_names[:1])
     # pbar = tqdm(file_names[-2:])
     for name in pbar:
         pbar.set_description(f"solving problem {name}")
         for sb in symm_break:
             path=instances_folder+f'/{name}'
             filename,m,n,l,s,d = read_raw_instances(path)
+            print()
+            print(filename,m,n,l,s,d)
             result_dict = run_z3_with_external_timeout(
                 external_timeout_seconds=MAX_TIME,
                 model_func=my_model,

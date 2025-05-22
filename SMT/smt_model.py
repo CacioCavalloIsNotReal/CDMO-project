@@ -1,6 +1,12 @@
 from z3 import *
 import time
 
+def Iff(A, B):
+    return And(
+            Implies(A,B),
+            Implies(B,A)
+        )
+    
 def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
     start_time = time.time()
     opt = Optimize()
@@ -15,7 +21,7 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
 
     courier_load = [
         Sum(
-            [If(item_order(i,j)>=0,s[j], 0)
+            [If(item_order(i,j)>=1,s[j], 0)
             for j in range(n)]
         )
         for i in range(m)
@@ -31,7 +37,7 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
     for i in range(n):
         opt.add(
             Sum(
-                [If(item_order(c, i) >= 0, 1, 0) for c in range(m)]
+                [If(item_order(c, i) >= 1, 1, 0) for c in range(m)]
             ) == 1
         )
     
@@ -56,55 +62,94 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
             opt.add(
                 Sum(
                     # the number of times the courier i leaves from point j is once
-                    [If(travels(i,j,k), 1, 0) for k in range(n+1)]
-                ) == If(item_order(i,j)>=0,1, 0)
-            )
-            opt.add(
-                Sum(
-                    # the number of times the courier i arrives to j is only once
                     [If(travels(i,k,j), 1, 0) for k in range(n+1)]
-                ) == If(item_order(i,j)>=0,1, 0)
+                ) == If(item_order(i,j)>=1,1, 0)
             )
+            # opt.add(
+            #     Sum(
+            #         # the number of times the courier i arrives to j is only once
+            #         [If(travels(i,k,j), 1, 0) for k in range(n+1)]
+            #     ) == If(item_order(i,j)>=0,1, 0)
+            # )
 
     for i in range(m):
         for j in range(n):
-            for k in range(j,n):
-                for z in range(j,n):
-                    opt.add(
-                        Implies(    # if a courier arrives at k, then it can never comeback to that point k
-                            travels(i, j, k), Not(travels(i, z, k))
-                        )
-                    )
+            opt.add(
+                    Not(travels(i, j,j))
+                )
+            # for k in range(j,n):
+            #     for z in range(j,n): 
+            #         opt.add(
+            #             Implies(    # if a courier arrives at k, then it can never comeback to that point k
+            #                 travels(i, j, k), Not(travels(i, z, k))
+            #             )
+            #             # And(
+            #             #     Implies(    # if a courier arrives at k, then it can never comeback to that point k
+            #             #         travels(i, j, k), Not(travels(i, z, k))
+            #             #     ),
+            #             #     Implies(    # if a courier arrives at k, then it can never comeback to that point k
+            #             #         Not(travels(i, z, k)), travels(i, j, k)
+            #             #     )
+            #             # )
+            #         )
 
     # value constraints
     for i in range(m):
-        for j in range(n + 1):
+        for j in range(n):
             opt.add(
-                Or(
-                    And(
-                        item_order(i, j) >= 1, item_order(i, j) <= n,   # domain if item is delivered
-                    ),
-                    item_order(i, j) == -1   # domain if item is not delivered
-                )
+                And(
+                        item_order(i, j) >= 0, item_order(i, j) <= n,   # domain if item is delivered
+                    )
+                # Or(
+                #     And(
+                #         item_order(i, j) >= 1, item_order(i, j) <= n,   # domain if item is delivered
+                #     ),
+                #     item_order(i, j) == 0   # domain if item is not delivered
+                # )
             )
         
-        for j in range(n + 1):
-            opt.add(
-                Implies(    # default value, if the item j is not delivered by courier i, then its value is -1
-                    If(item_order(i,j)>=0,False, True),
-                    item_order(i, j) == -1
-                )
-            )
+        for j in range(n):
+            # guarda che qua non stai dicendo un bel cazzo di niente
+            # opt.add(
+            #     Iff(    # default value, if the item j is not delivered by courier i, then its value is -1
+            #         Not(item_order(i,j)>=1),
+            #         item_order(i, j) == 0
+            #     )
+            # )
 
+            opt.add(
+                # Iff(    # default value, if the item j is not delivered by courier i, then its value is -1 
+                #     If(
+                #         Sum(
+                #             # the number of times the courier i leaves from point j is once
+                #             [If(travels(i,j,k), 1, 0) for k in range(n+1)]
+                #         )>=1,False, True
+                #     ),
+                #     item_order(i, j) == 0
+                # )
+                Iff(
+                    item_order(i, j) == 0,
+                    And(
+                        Sum(
+                            [If(travels(i,j,k), 1, 0) for k in range(n+1)]
+                        )==0, 
+                        Sum(
+                            [If(travels(i,k,j), 1, 0) for k in range(n+1)]
+                        )==0
+                    )
+                ),
+            )
+    
     for i in range(m):
         # Distinct(item_order)
         for j1 in range(n):
-            for j2 in range(j1 + 1, n):
+            for j2 in range(n):
                 opt.add(
                     Implies(    # if the courier deliver both j1 and j2, then their value must be different
                         And(
-                            If(item_order(i,j1)>=0,True, False),
-                            If(item_order(i,j2)>=0,True, False)
+                            j1!=j2,
+                            item_order(i,j1)>=1,
+                            item_order(i,j2)>=1
                         ),
                         item_order(i, j1) != item_order(i, j2)
                     )
@@ -186,6 +231,7 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
                 [If(travels(i, j, k), d[j][k], 0) for j in range(n+1) for k in range(n+1)]
             )
         )
+    
 
     max_dist = Int("max_dist")
     for distance in distances:
@@ -216,80 +262,80 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
         'max_distance': None # Inizializzato a None
     }
     
-    if result_status == sat:
-        solution['solution_found'] = True
-        model = opt.model()
-
-        solution['max_distance'] = model.evaluate(max_dist).as_long()
-
-        for i in range(m):
-            for j_node in range(n + 1): # j_node può essere un item o l'origine
-                for k_node in range(n + 1): # k_node può essere un item o l'origine
-                    if j_node != k_node and model.evaluate(travels(i, j_node, k_node)) is True: # is_true non serve se confrontiamo con True
-                        solution['travels'].append((i, j_node, k_node))
-
-        for i in range(m):
-            for j_item_idx in range(n): # j_item_idx è l'indice dell'item
-                val_expr = model.evaluate(item_order(i, j_item_idx))
-                if val_expr is not None: # Dovrebbe sempre esserlo se sat
-                    val_long = val_expr.as_long()
-                    if val_long >= 0: # Consideriamo solo ordini validi (non -1)
-                        solution['item_order'].append((i, j_item_idx, val_long))
-
-        for i in range(m):
-            dist_val = model.evaluate(distances[i])
-            solution['distances'].append(dist_val.as_long() if dist_val is not None else 0)
-
-        return solution
-    
-    elif result_status == unknown:
-        # solution['solution_found'] è già False
-        # solution['status'] è già 'unknown'
-        # Potremmo voler registrare perché è unknown (es. timeout interno di Z3)
-        reason_unknown = opt.reason_unknown()
-        if reason_unknown:
-             solution['reason_unknown'] = reason_unknown
-        return solution
-    else: # unsat
-        # solution['solution_found'] è già False
-        # solution['status'] è già 'unsat'
-        return solution
-
-
-    # result = opt.check()
-    # solution = {
-    #         'time' : time.time() - start_time,
-    #         'solution' : True,
-    #         'travels': [],
-    #         'item_order': [],
-    #         'distances': [],
-    #         'max_distance': 0
-    #     }
-    
-    # if result == sat:
+    # if result_status == sat:
+    #     solution['solution_found'] = True
     #     model = opt.model()
 
     #     solution['max_distance'] = model.evaluate(max_dist).as_long()
 
     #     for i in range(m):
-    #         for j in range(n + 1):
-    #             for k in range(n + 1):
-    #                 if is_true(model.evaluate(travels(i, j, k))):
-    #                     solution['travels'].append((i, j, k))
+    #         for j_node in range(n + 1): # j_node può essere un item o l'origine
+    #             for k_node in range(n + 1): # k_node può essere un item o l'origine
+    #                 if j_node != k_node and model.evaluate(travels(i, j_node, k_node)) is True: # is_true non serve se confrontiamo con True
+    #                     solution['travels'].append((i, j_node, k_node))
 
     #     for i in range(m):
-    #         for j in range(n):
-    #             val = model.evaluate(item_order(i, j))
-    #             if val is not None and val.as_long() >= 0:
-    #                 solution['item_order'].append((i, j, val.as_long()))
+    #         for j_item_idx in range(n): # j_item_idx è l'indice dell'item
+    #             val_expr = model.evaluate(item_order(i, j_item_idx))
+    #             if val_expr is not None: # Dovrebbe sempre esserlo se sat
+    #                 val_long = val_expr.as_long()
+    #                 if val_long >= 0: # Consideriamo solo ordini validi (non -1)
+    #                     solution['item_order'].append((i, j_item_idx, val_long))
 
     #     for i in range(m):
-    #         solution['distances'].append(model.evaluate(distances[i]).as_long())
+    #         dist_val = model.evaluate(distances[i])
+    #         solution['distances'].append(dist_val.as_long() if dist_val is not None else 0)
 
     #     return solution
-    # elif result == unknown:
-    #     solution['solution'] = False
-    #     return {'solution' : False,}
-    # else: 
-    #     solution['solution'] = False
-    #     return {'solution' : False,}
+    
+    # elif result_status == unknown:
+    #     # solution['solution_found'] è già False
+    #     # solution['status'] è già 'unknown'
+    #     # Potremmo voler registrare perché è unknown (es. timeout interno di Z3)
+    #     reason_unknown = opt.reason_unknown()
+    #     if reason_unknown:
+    #          solution['reason_unknown'] = reason_unknown
+    #     return solution
+    # else: # unsat
+    #     # solution['solution_found'] è già False
+    #     # solution['status'] è già 'unsat'
+    #     return solution
+
+
+    result = opt.check()
+    solution = {
+            'time' : time.time() - start_time,
+            'solution' : True,
+            'travels': [],
+            'item_order': [],
+            'distances': [],
+            'max_distance': 0
+        }
+    
+    if result == sat:
+        model = opt.model()
+        print(model)
+        solution['max_distance'] = model.evaluate(max_dist).as_long()
+
+        for i in range(m):
+            for j in range(n + 1):
+                for k in range(n + 1):
+                    if is_true(model.evaluate(travels(i, j, k))):
+                        solution['travels'].append((i, j, k))
+
+        for i in range(m):
+            for j in range(n):
+                val = model.evaluate(item_order(i, j))
+                if val is not None and val.as_long() >= 0:
+                    solution['item_order'].append((i, j, val.as_long()))
+
+        for i in range(m):
+            solution['distances'].append(model.evaluate(distances[i]).as_long())
+
+        return solution
+    elif result == unknown:
+        solution['solution'] = False
+        return {'solution' : False,}
+    else: 
+        solution['solution'] = False
+        return {'solution' : False,}
