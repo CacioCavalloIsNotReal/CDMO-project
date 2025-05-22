@@ -38,4 +38,10 @@ def save_result(data, path):
     if not len(data)==0:
         with open(path, 'w') as file:
             json.dump(data, file, indent=4)
-    
+
+def choose_instance(instance_name):
+    if int(instance_name) in range(1, 10):
+        instance = f"inst0{instance_name}.dzn"
+    elif int(instance_name) in range(10, 22):
+        instance = f"inst{instance_name}.dzn"
+    return instance

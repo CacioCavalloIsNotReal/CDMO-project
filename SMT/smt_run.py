@@ -12,11 +12,10 @@ def choose_instance(instance_name):
         instance = f"inst{instance_name}.dat"
     return instance
 
-def execute_smt(symbreak: Bool = False, instance_name: str = "all"):
+def execute_smt(symbreak: bool = False, instance_name: str = "all"):
     os.makedirs("./SMT/result_symbreak", exist_ok=True)
     os.makedirs("./SMT/result_nosymbreak", exist_ok=True)
 
-    print(symbreak)
     module_path = os.path.dirname(os.path.realpath(__file__))
     outpath = "/".join(module_path.split('/')[:-1]+['res', 'SMT'])
 
