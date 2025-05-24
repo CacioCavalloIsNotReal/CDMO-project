@@ -149,7 +149,6 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
                     travels(i, n, k), item_order(i, k) == 1
                 )
             )
-        # manca un constriant che dice che se hai consegnato tutto, torni all'origine
 
     for i in range(m):
         for j in range(n):
@@ -166,21 +165,26 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
     # the courier c deliver as last item j
     courier_last_item = Function('courier_last_item', IntSort(), IntSort() )
     for c in range(m):
-        tmp = Int("tmp")
+        tmp = Int(f"tmp_{c}")
         for k in range(n):
             opt.add(
                 And(
                     item_order(c, tmp)>=item_order(c, k),
                     tmp >= 0,
-                    tmp <= n
+                    tmp < n # NB. n is the origin, not an item
                 )
             )
         opt.add(
-            Or([item_order(c, tmp)==item_order(c, k) for k in range(n)])
-        )
-        opt.add(
             courier_last_item(c)==tmp
         )
+        # for k in range(n):
+        #     opt.add(
+        #         And(
+        #             item_order(c, courier_last_item(c))>=item_order(c, k),
+        #             courier_last_item(c) >= 0,
+        #             courier_last_item(c) <= n
+        #         )
+        #     )
     for c in range(m):
         opt.add(
             travels(c, courier_last_item(c), n) == True
