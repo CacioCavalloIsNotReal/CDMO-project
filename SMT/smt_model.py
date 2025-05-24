@@ -17,7 +17,7 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
     item_order = Function('item_order', IntSort(), IntSort(), IntSort())
 
     # travels   -> courier i travels from j to k
-    travels = Function('deliver', IntSort(), IntSort(), IntSort(), BoolSort())
+    travels = Function('travels', IntSort(), IntSort(), IntSort(), BoolSort())
 
     courier_load = [
         Sum(
@@ -74,24 +74,11 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
 
     for i in range(m):
         for j in range(n):
+            # this combined with the fact that a courier can't come back in the same item is sufficient
             opt.add(
                     Not(travels(i, j,j))
                 )
-            # for k in range(j,n):
-            #     for z in range(j,n): 
-            #         opt.add(
-            #             Implies(    # if a courier arrives at k, then it can never comeback to that point k
-            #                 travels(i, j, k), Not(travels(i, z, k))
-            #             )
-            #             # And(
-            #             #     Implies(    # if a courier arrives at k, then it can never comeback to that point k
-            #             #         travels(i, j, k), Not(travels(i, z, k))
-            #             #     ),
-            #             #     Implies(    # if a courier arrives at k, then it can never comeback to that point k
-            #             #         Not(travels(i, z, k)), travels(i, j, k)
-            #             #     )
-            #             # )
-            #         )
+
 
     # value constraints
     for i in range(m):
@@ -162,6 +149,7 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
                     travels(i, n, k), item_order(i, k) == 1
                 )
             )
+        # manca un constriant che dice che se hai consegnato tutto, torni all'origine
 
     for i in range(m):
         for j in range(n):
@@ -173,6 +161,31 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
                             item_order(i, k) == item_order(i, j) + 1
                         )
                     )
+
+    # manca un constriant che dice che se hai consegnato tutto, torni all'origine
+    # the courier c deliver as last item j
+    courier_last_item = Function('courier_last_item', IntSort(), IntSort() )
+    for c in range(m):
+        tmp = Int("tmp")
+        for k in range(n):
+            opt.add(
+                And(
+                    item_order(c, tmp)>=item_order(c, k),
+                    tmp >= 0,
+                    tmp <= n
+                )
+            )
+        opt.add(
+            Or([item_order(c, tmp)==item_order(c, k) for k in range(n)])
+        )
+        opt.add(
+            courier_last_item(c)==tmp
+        )
+    for c in range(m):
+        opt.add(
+            travels(c, courier_last_item(c), n) == True
+        )
+
 
     '''
     ragioniamo

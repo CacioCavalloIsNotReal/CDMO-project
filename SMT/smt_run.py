@@ -12,6 +12,12 @@ def choose_instance(instance_name):
         instance = f"inst{instance_name}.dat"
     return instance
 
+def prepare_solution(input):
+    print(input)
+    output = {}
+
+    return input
+
 def execute_smt(symbreak: bool = False, instance_name: str = "all"):
     os.makedirs("./SMT/result_symbreak", exist_ok=True)
     os.makedirs("./SMT/result_nosymbreak", exist_ok=True)
@@ -40,9 +46,9 @@ def execute_smt(symbreak: bool = False, instance_name: str = "all"):
                 timeout=MAX_TIME # Timeout interno per Z3 (in ms)
             )
             if symbreak:
-                write_output(result_dict, f'./SMT/result_symbreak/{filename}.json')
+                write_output(prepare_solution(result_dict), f'./SMT/result_symbreak/{filename}.json')
             else:
-                write_output(result_dict, f'./SMT/result_nosymbreak/{filename}.json')
+                write_output(prepare_solution(result_dict), f'./SMT/result_nosymbreak/{filename}.json')
 
     else:
         instance_name = choose_instance(instance_name)
@@ -63,9 +69,9 @@ def execute_smt(symbreak: bool = False, instance_name: str = "all"):
                 timeout=MAX_TIME # Timeout interno per Z3 (in ms)
             )
         if symbreak:
-            write_output(result_dict, f'./SMT/result_symbreak/{filename}.json')
+            write_output(prepare_solution(result_dict), f'./SMT/result_symbreak/{filename}.json')
         else:
-            write_output(result_dict, f'./SMT/result_nosymbreak/{filename}.json')
+            write_output(prepare_solution(result_dict), f'./SMT/result_nosymbreak/{filename}.json')
 
     combine_results(
         result_nosymbreak_dir="./SMT/result_nosymbreak",
