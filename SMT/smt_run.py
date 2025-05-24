@@ -2,6 +2,7 @@ import os
 from tqdm import tqdm
 from .smt_utils import *
 from .smt_model import *
+import numpy as np
 
 MAX_TIME = 300
 
@@ -13,10 +14,30 @@ def choose_instance(instance_name):
     return instance
 
 def prepare_solution(input):
-    print(input)
-    output = {}
+    # NB sta cosa va calcolata soltanto se è stata trovata una soluzione!
+    item_order = np.array(input['item_order']).T
+    couriers = np.unique(item_order[0])
 
-    return input
+    percorso = []
+    for courier in couriers:
+        mask = item_order[0] == courier
+        courier_m = item_order[:, mask]
+        positions = np.argsort(courier_m[2])
+        n_zeros = sum(courier_m[2]==0)
+        m_idxs = positions[n_zeros:]
+        trip = [int(courier_m[1][idx]+1) for idx in m_idxs]
+        percorso.append(trip)
+
+    print(input)
+    output = {
+        'time' : int(input['time']) if  input['time']<=300 else 300 ,
+        'optimal' : input['solution']  ,    # non ne sono completamente sicuro
+        'obj' : input['max_distance'] ,
+        'sol': percorso
+        }
+
+    print(output)
+    return output
 
 def execute_smt(symbreak: bool = False, instance_name: str = "all"):
     os.makedirs("./SMT/result_symbreak", exist_ok=True)
