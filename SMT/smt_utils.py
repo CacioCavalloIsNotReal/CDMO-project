@@ -27,6 +27,46 @@ def read_raw_instances(path:str):
 
 def run_z3_with_external_timeout(external_timeout_seconds, model_func, *args, **kwargs):
     result_queue = queue.Queue()
+
+    def worker():
+        try:
+            result = model_func(*args, **kwargs)
+            result_queue.put(result)
+        except Z3Exception as e:
+            result_queue.put({
+                'solution_found': False,
+                'status': 'z3_exception',
+                'error': str(e)
+            })
+        except Exception as e:
+            result_queue.put({
+                'solution_found': False,
+                'status': 'generic_exception',
+                'error': str(e)
+            })
+
+    thread = threading.Thread(target=worker)
+    thread.start()
+    thread.join(external_timeout_seconds)
+
+    if thread.is_alive():
+        return {
+            'solution_found': False,
+            'status': 'timeout',
+            'time': external_timeout_seconds
+        }
+
+    try:
+        return result_queue.get_nowait()
+    except queue.Empty:
+        return {
+            'solution_found': False,
+            'status': 'no_result',
+            'error': 'Thread completed but no result was returned.'
+        }
+    
+def oldrun_z3_with_external_timeout(external_timeout_seconds, model_func, *args, **kwargs):
+    result_queue = queue.Queue()
     opt_instance_container = [None] 
 
     kwargs_for_model = kwargs.copy()
@@ -126,7 +166,7 @@ def write_output(results, output_path):
         with open(output_path, 'w') as f:
             output_data = {"z3": results}
             json.dump(output_data, f, indent=4)
-        print(f"Results written to {output_path}")
+        # print(f"Results written to {output_path}")
     except Exception as e:
         print(f"Error writing output file {output_path}: {e}", file=sys.stderr)
 
@@ -162,4 +202,4 @@ def combine_results(result_nosymbreak_dir, result_symbreak_dir):
         output_path = os.path.join("res/SMT", file_name)
         with open(output_path, 'w') as f:
             json.dump(result, f, indent=4)
-        print(f"Combined results written to {output_path}")
+        # print(f"Combined results written to {output_path}")
