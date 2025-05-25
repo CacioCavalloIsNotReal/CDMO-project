@@ -65,16 +65,10 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
                     [If(travels(i,k,j), 1, 0) for k in range(n+1)]
                 ) == If(item_order(i,j)>=1,1, 0)
             )
-            # opt.add(
-            #     Sum(
-            #         # the number of times the courier i arrives to j is only once
-            #         [If(travels(i,k,j), 1, 0) for k in range(n+1)]
-            #     ) == If(item_order(i,j)>=0,1, 0)
-            # )
 
     for i in range(m):
         for j in range(n):
-            # this combined with the fact that a courier can't come back in the same item is sufficient
+            # this combined with the fact that a courier can't come back in the same item/point is sufficient
             opt.add(
                     Not(travels(i, j,j))
                 )
@@ -85,35 +79,13 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
         for j in range(n):
             opt.add(
                 And(
-                        item_order(i, j) >= 0, item_order(i, j) <= n,   # domain if item is delivered
+                        item_order(i, j) >= 0, item_order(i, j) <= n,   # domain 
                     )
-                # Or(
-                #     And(
-                #         item_order(i, j) >= 1, item_order(i, j) <= n,   # domain if item is delivered
-                #     ),
-                #     item_order(i, j) == 0   # domain if item is not delivered
-                # )
             )
         
         for j in range(n):
-            # guarda che qua non stai dicendo un bel cazzo di niente
-            # opt.add(
-            #     Iff(    # default value, if the item j is not delivered by courier i, then its value is -1
-            #         Not(item_order(i,j)>=1),
-            #         item_order(i, j) == 0
-            #     )
-            # )
-
             opt.add(
-                # Iff(    # default value, if the item j is not delivered by courier i, then its value is -1 
-                #     If(
-                #         Sum(
-                #             # the number of times the courier i leaves from point j is once
-                #             [If(travels(i,j,k), 1, 0) for k in range(n+1)]
-                #         )>=1,False, True
-                #     ),
-                #     item_order(i, j) == 0
-                # )
+                # default value, if the item j is not delivered by courier i, then its value is 0
                 Iff(
                     item_order(i, j) == 0,
                     And(
@@ -161,8 +133,7 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
                         )
                     )
 
-    # manca un constriant che dice che se hai consegnato tutto, torni all'origine
-    # the courier c deliver as last item j
+    # the courier c deliver as last item j and then com eback to the origin
     courier_last_item = Function('courier_last_item', IntSort(), IntSort() )
     for c in range(m):
         tmp = Int(f"tmp_{c}")
@@ -177,37 +148,12 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
         opt.add(
             courier_last_item(c)==tmp
         )
-        # for k in range(n):
-        #     opt.add(
-        #         And(
-        #             item_order(c, courier_last_item(c))>=item_order(c, k),
-        #             courier_last_item(c) >= 0,
-        #             courier_last_item(c) <= n
-        #         )
-        #     )
+
     for c in range(m):
         opt.add(
             travels(c, courier_last_item(c), n) == True
         )
 
-
-    '''
-    ragioniamo
-    in questo problema la simmetria avviene quando due corrieri possono fare lo stesso lavoro.
-    se due corrieri sono capaci di fare un certo lavoro, occorre imporre l'ordine.
-    due corrieri possono fare lo stesso lavoro quando
-    max(current_load_i)<min(load_capacity)
-
-    se avviene questo noi possiamo scambiare la soluzione senza problemi, ed è quello che vogliamo evitare.
-    lo swap è possibile nel seguente modo:
-        - item_order il corriere i consegna l'item j con ordine valore
-            -> item_order(c1,j) = item_order(c2,j)
-            -> item_order(c2,j) = item_order(c1,j)
-        - travels con significato corriere i viaggia da j a k
-            -> travels(c1,j,k) = travels(c2,j,k)
-            -> travels(c2,j,k) = travels(c1,j,k)
-        dove va imposto l'ordinamento? sulle variabili che introducono simmetria -> item_order
-    '''
     if symm_break:
         for c1 in range(m):
             for c2 in range(c1 + 1, m):
@@ -248,7 +194,6 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
                 [If(travels(i, j, k), d[j][k], 0) for j in range(n+1) for k in range(n+1)]
             )
         )
-    
 
     max_dist = Int("max_dist")
     for distance in distances:
@@ -263,66 +208,14 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
 
     opt.minimize(max_dist)
     
-    result_status = opt.check()
-    
-    if opt_container is not None: # Pulisci il riferimento
+    if opt_container is not None:
         opt_container[0] = None
-
-    # Preparazione del dizionario di output
-    solution = {
-        'time' : time.time() - start_time,
-        'solution_found' : False, # Cambiato da 'solution' a 'solution_found' per chiarezza
-        'status': str(result_status), # Aggiungiamo lo status Z3 (sat, unsat, unknown)
-        'travels': [],
-        'item_order': [],
-        'distances': [],
-        'max_distance': None # Inizializzato a None
-    }
-    
-    # if result_status == sat:
-    #     solution['solution_found'] = True
-    #     model = opt.model()
-
-    #     solution['max_distance'] = model.evaluate(max_dist).as_long()
-
-    #     for i in range(m):
-    #         for j_node in range(n + 1): # j_node può essere un item o l'origine
-    #             for k_node in range(n + 1): # k_node può essere un item o l'origine
-    #                 if j_node != k_node and model.evaluate(travels(i, j_node, k_node)) is True: # is_true non serve se confrontiamo con True
-    #                     solution['travels'].append((i, j_node, k_node))
-
-    #     for i in range(m):
-    #         for j_item_idx in range(n): # j_item_idx è l'indice dell'item
-    #             val_expr = model.evaluate(item_order(i, j_item_idx))
-    #             if val_expr is not None: # Dovrebbe sempre esserlo se sat
-    #                 val_long = val_expr.as_long()
-    #                 if val_long >= 0: # Consideriamo solo ordini validi (non -1)
-    #                     solution['item_order'].append((i, j_item_idx, val_long))
-
-    #     for i in range(m):
-    #         dist_val = model.evaluate(distances[i])
-    #         solution['distances'].append(dist_val.as_long() if dist_val is not None else 0)
-
-    #     return solution
-    
-    # elif result_status == unknown:
-    #     # solution['solution_found'] è già False
-    #     # solution['status'] è già 'unknown'
-    #     # Potremmo voler registrare perché è unknown (es. timeout interno di Z3)
-    #     reason_unknown = opt.reason_unknown()
-    #     if reason_unknown:
-    #          solution['reason_unknown'] = reason_unknown
-    #     return solution
-    # else: # unsat
-    #     # solution['solution_found'] è già False
-    #     # solution['status'] è già 'unsat'
-    #     return solution
-
 
     result = opt.check()
     solution = {
             'time' : time.time() - start_time,
-            'solution' : True,
+            'solution_found' : True,
+            'status': str(result), 
             'travels': [],
             'item_order': [],
             'distances': [],
@@ -331,7 +224,6 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
     
     if result == sat:
         model = opt.model()
-        print(model)
         solution['max_distance'] = model.evaluate(max_dist).as_long()
 
         for i in range(m):
@@ -351,8 +243,8 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
 
         return solution
     elif result == unknown:
-        solution['solution'] = False
-        return {'solution' : False,}
+        solution['solution_found'] = False
+        return solution
     else: 
-        solution['solution'] = False
-        return {'solution' : False,}
+        solution['solution_found'] = False
+        return solution

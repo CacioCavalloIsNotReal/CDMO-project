@@ -24,6 +24,7 @@ def execute_cp(instance_name: str, solver_name: str = 'gecode', symbreak: bool =
         istc.to_file(savepath)
 
     outpath = "/".join(module_path.split('/')[:-1]+['res', 'CP'])
+    os.makedirs(outpath, exist_ok=True)
     dzn_names = os.listdir(savepath)    # list of dzn contained into CP/instances
 
     solutions = {name:{} for name in dzn_names}
@@ -47,7 +48,7 @@ def execute_cp(instance_name: str, solver_name: str = 'gecode', symbreak: bool =
         
     except ValueError as e:
         # instance_name is a string all
-        pbar = tqdm(dzn_names)
+        pbar = tqdm(sorted(dzn_names))
         for name in pbar:
             pbar.set_description(f"solving problem {name}")
             for solver in solvers:
