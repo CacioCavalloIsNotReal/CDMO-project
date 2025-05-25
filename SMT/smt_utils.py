@@ -5,6 +5,7 @@ import time
 import json
 import os
 import sys
+import multiprocessing
 from z3 import Z3Exception
 
 def read_raw_instances(path:str):
@@ -25,45 +26,28 @@ def read_raw_instances(path:str):
     d = np.matrix(matrix[:-2]).tolist()
     return filename,m,n,l,s,d
 
-def run_z3_with_external_timeout(external_timeout_seconds, model_func, *args, **kwargs):
-    result_queue = queue.Queue()
-
-    def worker():
-        try:
-            result = model_func(*args, **kwargs)
-            result_queue.put(result)
-        except Z3Exception as e:
-            result_queue.put({
-                'solution_found': False,
-                'status': 'z3_exception',
-                'error': str(e)
-            })
-        except Exception as e:
-            result_queue.put({
-                'solution_found': False,
-                'status': 'generic_exception',
-                'error': str(e)
-            })
-
-    thread = threading.Thread(target=worker)
-    thread.start()
-    thread.join(external_timeout_seconds)
-
-    if thread.is_alive():
-        return {
-            'solution_found': False,
-            'status': 'timeout',
-            'time': external_timeout_seconds
-        }
-
+def model_wrapper(queue, model_func, *args, **kwargs):
     try:
-        return result_queue.get_nowait()
-    except queue.Empty:
-        return {
-            'solution_found': False,
-            'status': 'no_result',
-            'error': 'Thread completed but no result was returned.'
-        }
+        result = model_func(*args, **kwargs)
+        queue.put(result)
+    except Exception as e:
+        queue.put({'solution_found': False, 'status': 'error', 'error': str(e)})
+
+def run_z3_with_external_timeout(external_timeout_seconds, model_func, *args, **kwargs):
+    queue = multiprocessing.Queue()
+    p = multiprocessing.Process(target=model_wrapper, args=(queue, model_func, *args), kwargs=kwargs)
+    p.start()
+    p.join(external_timeout_seconds)
+
+    if p.is_alive():
+        p.terminate()
+        p.join()
+        return {'solution_found': False, 'status': 'timeout'}
+
+    if not queue.empty():
+        return queue.get()
+    else:
+        return {'solution_found': False, 'status': 'no_result'}
     
 def oldrun_z3_with_external_timeout(external_timeout_seconds, model_func, *args, **kwargs):
     result_queue = queue.Queue()
