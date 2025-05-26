@@ -36,5 +36,5 @@ if __name__ == "__main__":
                 instance_name=instance
             )
     except Exception as e:
-        print("vrong values, try again", e)
+        print("Wrong values, try again", e)
 

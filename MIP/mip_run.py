@@ -16,8 +16,10 @@ def choose_solver(solver_name):
             print("Invalid solver name. Please choose from Gurobi, CBC, or HiGHS.")
 
 def choose_instance(instance_name):
-    if int(instance_name) in range(1, 21):
+    if int(instance_name) in range(1, 9):
         instance = f"inst0{instance_name}.dat"
+    elif int(instance_name) in range(10, 22):
+        instance = f"inst{instance_name}.dat"
     return instance
 
 def execute_mip(instance_name: str, solver_name: str = 'highs', symbreak: bool = False):
