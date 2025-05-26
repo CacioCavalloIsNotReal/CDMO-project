@@ -7,7 +7,7 @@ import numpy as np
 MAX_TIME = 300
 
 def choose_instance(instance_name):
-    if int(instance_name) in range(1, 9):
+    if int(instance_name) in range(1, 10):
         instance = f"inst0{instance_name}.dat"
     elif int(instance_name) in range(10, 22):
         instance = f"inst{instance_name}.dat"
