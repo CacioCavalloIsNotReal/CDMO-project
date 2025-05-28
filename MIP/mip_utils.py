@@ -1,3 +1,4 @@
+import multiprocessing
 import sys
 import os
 import json
@@ -57,6 +58,29 @@ def parse_instance(filepath):
     except Exception as e:
         print(f"Error parsing instance file {filepath}: {e}", file=sys.stderr)
         sys.exit(1)
+
+def model_wrapper(queue, model_func, *args, **kwargs):
+    try:
+        result = model_func(*args, **kwargs)
+        queue.put(result)
+    except Exception as e:
+        queue.put({'solution_found': False, 'status': 'error', 'error': str(e)})
+
+def run_z3_with_external_timeout(external_timeout_seconds, model_func, *args, **kwargs):
+    queue = multiprocessing.Queue()
+    p = multiprocessing.Process(target=model_wrapper, args=(queue, model_func, *args), kwargs=kwargs)
+    p.start()
+    p.join(external_timeout_seconds)
+
+    if p.is_alive():
+        p.terminate()
+        p.join()
+        return {'solution_found': False, 'status': 'timeout'}
+
+    if not queue.empty():
+        return queue.get()
+    else:
+        return {'solution_found': False, 'status': 'no_result'}
 
 def write_output(results, output_path, approach_name="mip_pulp"): # Allow customizing approach name
     """Writes the results to a JSON file."""

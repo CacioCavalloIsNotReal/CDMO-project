@@ -1,6 +1,7 @@
 from .mip_model import solve_mcp_mip
-from .mip_utils import parse_instance, write_output, combine_results
+from .mip_utils import parse_instance, write_output, combine_results, run_z3_with_external_timeout
 import os
+import numpy as np
 
 INSTANCES_DIR = os.path.abspath('instances')
 
@@ -16,13 +17,31 @@ def choose_solver(solver_name):
             print("Invalid solver name. Please choose from Gurobi, CBC, or HiGHS.")
 
 def choose_instance(instance_name):
-    if int(instance_name) in range(1, 10):
+    if int(instance_name) in range(1, 10): # Changed from range(1, 9) to range(1, 10) to include 9
         instance = f"inst0{instance_name}.dat"
     elif int(instance_name) in range(10, 22):
         instance = f"inst{instance_name}.dat"
     return instance
 
+def prepare_solution(input):
+    try:
+        if not input['solution_found']:
+            output = {
+                'time' : 300,
+                'optimal' : False,
+                'obj' : 0,
+                'sol': []
+                }    
+        else:
+            output = input
+
+    except:
+        output = input
+
+    return output
+
 def execute_mip(instance_name: str, solver_name: str = 'highs', symbreak: bool = False):
+    
     if instance_name == "all":
         print("Running on all instances...")
         for i in range(len(os.listdir(INSTANCES_DIR))):
@@ -46,15 +65,19 @@ def execute_mip(instance_name: str, solver_name: str = 'highs', symbreak: bool =
         else:
             results_dir = os.path.join("./MIP/result_nosymbreak", solver_name)
 
-        solution = solve_mcp_mip(
+        solution = run_z3_with_external_timeout(
+            external_timeout_seconds=300,
+            model_func=solve_mcp_mip,
             params=params,
             solver=solver,
-            time_limit_sec=300,  # Set a time limit of 10 minutes
-            add_symmetry_break=symbreak,
+            time_limit_sec=300,
+            add_symmetry_break=symbreak
         )
 
+        print(solution)
+
         output_path = os.path.join(results_dir, f"{'.'.join(instance.split('.')[:-1])}.json")
-        write_output(solution, output_path, solver_name)
+        write_output(prepare_solution(solution), output_path, solver_name)
     
     combine_results(
         result_nosymbreak_dir="./MIP/result_nosymbreak",
