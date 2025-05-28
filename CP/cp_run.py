@@ -54,9 +54,9 @@ def execute_cp(instance_name: str, solver_name: str = 'gecode', symbreak: bool =
             for solver in solvers:
                 for sb in symm_break:
                     path = savepath+'/'+name
-                    print(name, solver, sb)
+                    
                     result_tmp = cp_model(path,
-                                            verbose=True, 
+                                            verbose=False, 
                                             symm_break=sb, 
                                             solver=solver
                                             ).get_solution()

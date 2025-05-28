@@ -24,14 +24,13 @@ def run_cp():
     dzn_names = os.listdir(savepath)    # list of dzn contained into CP/instances
     solutions = {name:{} for name in dzn_names}
 
-    # pbar = tqdm(dzn_names)
-    pbar = tqdm(['inst01.dzn','inst03.dzn','inst04.dzn','inst07.dzn'])
+    pbar = tqdm(dzn_names)
+    # pbar = tqdm(['inst01.dzn','inst03.dzn','inst04.dzn','inst07.dzn'])
     for name in pbar:
         pbar.set_description(f"solving problem {name}")
         for solver in solvers:
             for sb in symm_break:
                 path = savepath+'/'+name
-                print(name, solver, sb)
                 result_tmp = cp_model(path,
                                         verbose=True, 
                                         symm_break=sb, 
