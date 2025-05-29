@@ -1,6 +1,6 @@
 {
     "z3": {
-        "time": 80,
+        "time": 62,
         "optimal": true,
         "obj": 322,
         "sol": [
@@ -27,7 +27,7 @@
         ]
     },
     "z3_symbreak": {
-        "time": 15,
+        "time": 9,
         "optimal": true,
         "obj": 322,
         "sol": [

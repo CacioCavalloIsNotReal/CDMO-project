@@ -6,7 +6,7 @@
         "sol": []
     },
     "z3_symbreak": {
-        "time": 20,
+        "time": 15,
         "optimal": true,
         "obj": 186,
         "sol": [
