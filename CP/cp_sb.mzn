@@ -89,17 +89,15 @@ constraint forall(i in 1..M)(
   alldifferent_except_0(row(path, i))     % each value which is not 0 (so the courier cross that point) must be differentcourier_distances
 );
 
-constraint courier_distances[max_index] = max_distance;
-
-constraint max_distance =   % impose the order
+constraint forall(i in 1..M)(
   sum(         
-    j in 1..path[max_index, N]-1,   % n. of items that must be transported, j= 1, 2, ... |node_subset|-1
+    j in 1..path[i, N]-1,   % n. of items that must be transported, j= 1, 2, ... |node_subset|-1
     k in 1..E                            % index
   where                               % reconstruct the trajectory
-    path[max_index, FROM[k] ]=j    /\
-    path[max_index, TO[k]   ]=j+1 
-  )(W[k]);  % sum of weights visited in a certain order
-
+    path[i, FROM[k] ]=j    /\
+    path[i, TO[k]   ]=j+1 
+  )(W[k]) <= max_distance
+);
 
 constraint max_distance = max(courier_distances);
 
