@@ -72,6 +72,7 @@ constraint symmetry_breaking_constraint(
 % **************************this part reconstruct the ORDER OF THE PATH***************************
 % ************************************************************************************************
 array[1..M, 1..N] of var 0..N: path; 
+array [1..M] of var int: evaluated_courier_distances;
 var 1..M: max_index;
 
 constraint forall(i in 1..M)(
@@ -90,14 +91,26 @@ constraint forall(i in 1..M)(
 );
 
 constraint forall(i in 1..M)(
-  sum(         
-    j in 1..path[i, N]-1,   % n. of items that must be transported, j= 1, 2, ... |node_subset|-1
-    k in 1..E                            % index
-  where                               % reconstruct the trajectory
-    path[i, FROM[k] ]=j    /\
-    path[i, TO[k]   ]=j+1 
-  )(W[k]) <= max_distance
+  evaluated_courier_distances[i] =
+    sum(         
+      j in 1..path[i, N]-1,   % n. of items that must be transported, j= 1, 2, ... |node_subset|-1
+      k in 1..E                            % index
+    where                               % reconstruct the trajectory
+      path[i, FROM[k] ]=j    /\
+      path[i, TO[k]   ]=j+1 
+    )(W[k])
 );
+
+constraint forall(i in 1..M)(
+  evaluated_courier_distances[i] <= max_distance
+);
+
+constraint courier_distances[max_index] = max_distance;
+
+constraint 
+  if evaluated_courier_distances[max_index] < max_distance then
+    courier_distances[max_index] = evaluated_courier_distances[max_index]
+  endif;
 
 constraint max_distance = max(courier_distances);
 

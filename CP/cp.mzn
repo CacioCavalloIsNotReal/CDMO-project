@@ -61,32 +61,45 @@ constraint forall(i in 1..M)(  % each courier can't exceed its maximum load rati
 % **************************this part reconstruct the ORDER OF THE PATH***************************
 % ************************************************************************************************
 array[1..M, 1..N] of var 0..N: path; 
+array [1..M] of var int: evaluated_courier_distances;
 var 1..M: max_index;
 
 constraint forall(i in 1..M)(
-  path[i, N-1]=1 /\                                 % forces the start to be 1 (first point to be seen)
-  path[i, N]=sum(row(node_subset,i)) /\             % forces the end to be sum(node_subset) (n of items the courier is transporting)
+  path[i, N-1]=1 /\                         % forces the start to be 1 (first point to be seen)
+  path[i, N]=sum(row(node_subset,i)) /\     % forces the end to be sum(node_subset) (n of items the courier is transporting)
 
-  forall(j in 1..N-2)(       % forces path[i,j] under consideration (if node_subset[i, j] is true) to be:
+  forall(j in 1..N-2)(              % forces path[i,j] under consideration (if node_subset[i, j] is true) to be:
     if node_subset[i, j] then
-      path[i, j]>1 /\                                    % bigger than 0 -> courier cross the point  
-      path[i, j]<path[i, N]                             % lower than the n of items the courier is transporting
+      path[i, j]>1 /\                       % bigger than 0 -> courier cross the point  
+      path[i, j]<path[i, N]                 % lower than the n of items the courier is transporting
     else
       path[i, j]=0
     endif
   ) /\
-  alldifferent_except_0(row(path, i))     % each value which is not 0 (so the courier cross that point) must be differentcourier_distances
+  alldifferent_except_0(row(path, i))       % each value which is not 0 (so the courier cross that point) must be differentcourier_distances
 );
 
 constraint forall(i in 1..M)(
-  sum(         
-    j in 1..path[i, N]-1,   % n. of items that must be transported, j= 1, 2, ... |node_subset|-1
-    k in 1..E                            % index
-  where                               % reconstruct the trajectory
-    path[i, FROM[k] ]=j    /\
-    path[i, TO[k]   ]=j+1 
-  )(W[k]) <= max_distance
+  evaluated_courier_distances[i] =
+    sum(         
+      j in 1..path[i, N]-1,           % n. of items that must be transported, j= 1, 2, ... |node_subset|-1
+      k in 1..E                       % index
+    where                       % reconstruct the trajectory
+      path[i, FROM[k] ]=j    /\
+      path[i, TO[k]   ]=j+1 
+    )(W[k])
 );
+
+constraint forall(i in 1..M)(
+  evaluated_courier_distances[i] <= max_distance
+);
+
+constraint courier_distances[max_index] = max_distance;
+
+constraint 
+  if evaluated_courier_distances[max_index] < max_distance then
+    courier_distances[max_index] = evaluated_courier_distances[max_index]
+  endif;
 
 constraint max_distance = max(courier_distances);
 
