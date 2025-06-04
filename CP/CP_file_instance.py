@@ -11,10 +11,17 @@ class CP_file_instance:
         self.s = s  # item size and endpoint
         self.d = np.array(d)  # manhattan distance matrix
         self.generate_graph()
+        self.lower = self.generate_lowerbound()
 
     def __repr__(self):
         return f"instance(m={self.m}, n={self.n}, l={self.l}, s={self.s}, d={self.d})"
     
+    def generate_lowerbound(self):
+        distances = []
+        for i in range(self.n):
+            distances.append(self.d[i][self.n] + self.d[self.n][i])
+        return max(distances)
+
     def generate_graph(self):
         """
         it creates a new representation which consist in a set of vertices and edges of the graph
@@ -57,6 +64,7 @@ class CP_file_instance:
             f.write('L = [' + ', '.join(map(str, self.l)) + '];\n')
             f.write('E = %d;\n' % (len(self.e_from)))# (self.n**2 + self.n))
             f.write('S = [' + ', '.join(f'{size}' for size in self.s) + '];\n')
+            f.write('LOWER = %d;\n' % self.lower)
             
             f.write('FROM = %s;\n' % json.dumps(self.e_from.tolist()))
             f.write('TO = %s;\n' % json.dumps(self.e_to.tolist()))

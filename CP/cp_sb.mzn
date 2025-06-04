@@ -6,6 +6,7 @@ int: N;                     % n. of items
 int: E;                     % n. of edges
 array [1..M] of int: L;     % couerier maximum load
 array [1..N-2] of int: S;   % item size/ endpoint
+int: LOWER;                 % lower value for max_distance
 %  graphs represented as lists of edges
 array [1..E] of int: FROM;  % nodes of the graph
 array [1..E] of int: TO;    % nodes of the graph
@@ -67,6 +68,11 @@ constraint symmetry_breaking_constraint(
       )
     )
 );
+
+% ************************************************************************************************
+% ******************************************lower bound*******************************************
+% ************************************************************************************************
+constraint max_distance >= LOWER;
 
 % ************************************************************************************************
 % **************************this part reconstruct the ORDER OF THE PATH***************************
