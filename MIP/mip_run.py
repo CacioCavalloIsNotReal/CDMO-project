@@ -1,5 +1,5 @@
 from .mip_model import solve_mcp_mip
-from .mip_utils import parse_instance, write_output, combine_results, run_z3_with_external_timeout
+from .mip_utils import parse_instance, write_output, combine_results, run_mip_with_external_timeout
 import os
 import numpy as np
 
@@ -29,7 +29,7 @@ def prepare_solution(input):
             output = {
                 'time' : 300,
                 'optimal' : False,
-                'obj' : 0,
+                'obj' : -1,
                 'sol': []
                 }    
         else:
@@ -65,7 +65,7 @@ def execute_mip(instance_name: str, solver_name: str = 'highs', symbreak: bool =
         else:
             results_dir = os.path.join("./MIP/result_nosymbreak", solver_name)
 
-        solution = run_z3_with_external_timeout(
+        solution = run_mip_with_external_timeout(
             external_timeout_seconds=300,
             model_func=solve_mcp_mip,
             params=params,

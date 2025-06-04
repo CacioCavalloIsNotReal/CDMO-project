@@ -66,7 +66,7 @@ def model_wrapper(queue, model_func, *args, **kwargs):
     except Exception as e:
         queue.put({'solution_found': False, 'status': 'error', 'error': str(e)})
 
-def run_z3_with_external_timeout(external_timeout_seconds, model_func, *args, **kwargs):
+def run_mip_with_external_timeout(external_timeout_seconds, model_func, *args, **kwargs):
     queue = multiprocessing.Queue()
     p = multiprocessing.Process(target=model_wrapper, args=(queue, model_func, *args), kwargs=kwargs)
     p.start()

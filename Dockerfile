@@ -35,9 +35,19 @@ RUN wget https://github.com/JuliaBinaryWrappers/HiGHSstatic_jll.jl/releases/down
 # Move HIGhS in an easier to access location
 RUN tar -xvzf HiGHSstatic.v1.10.0.x86_64-linux-gnu-cxx11.tar.gz -C /opt/highs
 
+# Gurobi
+ENV GUROBI_VERSION=12.0.1
+COPY gurobi.lic /opt/gurobi1201/gurobi.lic
+RUN wget https://packages.gurobi.com/12.0/gurobi12.0.1_linux64.tar.gz
+RUN tar -xvzf gurobi12.0.1_linux64.tar.gz -C /opt
+
+
 # Add minizinc and highs to PATH
 ENV PATH="/opt/minizinc/bin:$PATH"
 ENV PATH="/opt/highs/bin:$PATH"
+ENV PATH="/opt/gurobi1201/linux64/bin:$PATH"
+ENV LD_LIBRARY_PATH="/opt/gurobi1201/linux64/lib:$LD_LIBRARY_PATH"
+ENV GRB_LICENSE_FILE="/opt/gurobi1201/gurobi.lic"
 
 # Verify installation
 RUN minizinc --version

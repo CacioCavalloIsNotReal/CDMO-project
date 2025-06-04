@@ -136,7 +136,7 @@ def reconstruct_tours(solution, variables, params):
 
     return tours
 
-def solve_mcp_mip(params, time_limit_sec=300, add_symmetry_break=False, solver="PULP_CBC_CMD"):
+def solve_mcp_mip(params, time_limit_sec=305, add_symmetry_break=False, solver="PULP_CBC_CMD"):
     model, variables = build_mcp_model(params, add_symmetry_break)
     solution = solve_model(model, variables, solver, time_limit_sec)
 
