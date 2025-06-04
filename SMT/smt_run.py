@@ -70,6 +70,7 @@ def execute_smt(symbreak: bool = False, instance_name: str = "all"):
                     l=l, 
                     s=s, 
                     d=d,
+                    lower = generate_lowerbound(d, n),
                     symm_break=sb, # Prova con True o False
                     timeout=MAX_TIME # Timeout interno per Z3 (in ms)
                 )
@@ -98,6 +99,7 @@ def execute_smt(symbreak: bool = False, instance_name: str = "all"):
                 l=l, 
                 s=s, 
                 d=d,
+                lower = generate_lowerbound(d, n),
                 symm_break=symbreak,
                 timeout=MAX_TIME 
             )

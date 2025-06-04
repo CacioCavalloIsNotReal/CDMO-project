@@ -7,7 +7,7 @@ def Iff(A, B):
             Implies(B,A)
         )
     
-def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
+def my_model(m,n,l,s,d,lower,symm_break=False,timeout=None, opt_container=None):
     start_time = time.time()
     opt = Optimize()
     if timeout:
@@ -204,6 +204,10 @@ def my_model(m,n,l,s,d,symm_break=False,timeout=None, opt_container=None):
         Or(
             [max_dist == dist for dist in distances]
         )  
+    )
+
+    opt.add(
+        max_dist >= lower
     )
 
     opt.minimize(max_dist)

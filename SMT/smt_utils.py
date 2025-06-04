@@ -26,6 +26,12 @@ def read_raw_instances(path:str):
     d = np.matrix(matrix[:-2]).tolist()
     return filename,m,n,l,s,d
 
+def generate_lowerbound(d, n):
+    distances = []
+    for i in range(n):
+        distances.append(d[i][n] + d[n][i])
+    return max(distances)
+
 def model_wrapper(queue, model_func, *args, **kwargs):
     try:
         result = model_func(*args, **kwargs)
