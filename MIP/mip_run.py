@@ -1,5 +1,5 @@
 from .mip_model import solve_mcp_mip
-from .mip_utils import parse_instance, write_output, combine_results, run_mip_with_external_timeout
+from .mip_utils import parse_instance, write_output, combine_results, run_with_timeout
 import os
 import numpy as np
 
@@ -17,9 +17,9 @@ def choose_solver(solver_name):
             print("Invalid solver name. Please choose from Gurobi, CBC, or HiGHS.")
 
 def choose_instance(instance_name):
-    if int(instance_name) in range(1, 10): # Changed from range(1, 9) to range(1, 10) to include 9
+    if int(instance_name) in range(1, 10):
         instance = f"inst0{instance_name}.dat"
-    elif int(instance_name) in range(10, 22):
+    elif int(instance_name) in range(10, 22): 
         instance = f"inst{instance_name}.dat"
     return instance
 
@@ -65,8 +65,8 @@ def execute_mip(instance_name: str, solver_name: str = 'highs', symbreak: bool =
         else:
             results_dir = os.path.join("./MIP/result_nosymbreak", solver_name)
 
-        solution = run_mip_with_external_timeout(
-            external_timeout_seconds=305,
+        solution = run_with_timeout(
+            timeout=305,
             model_func=solve_mcp_mip,
             params=params,
             solver=solver,
@@ -80,6 +80,6 @@ def execute_mip(instance_name: str, solver_name: str = 'highs', symbreak: bool =
         write_output(prepare_solution(solution), output_path, solver_name)
     
     combine_results(
-        result_nosymbreak_dir="./MIP/result_nosymbreak",
-        result_symbreak_dir="./MIP/result_symbreak"
+        no_symm_dir="./MIP/result_nosymbreak",
+        symm_dir="./MIP/result_symbreak"
     )
