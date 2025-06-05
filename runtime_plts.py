@@ -6,7 +6,7 @@ matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 
 def main():
-    folder = 'res/SMT/'
+    folder = 'res/CP/'
     files = sorted(os.listdir(folder))
     runtime = defaultdict(dict)
 
@@ -18,7 +18,7 @@ def main():
                 runtime[solver][index] = solver_data['time']
 
     solvers = list(runtime.keys())
-    fig, axs = plt.subplots(2, int(len(solvers)/2), figsize=(12, 8)) 
+    fig, axs = plt.subplots(int(len(solvers)/2), 2, figsize=(12, 4*int(len(solvers)/2))) 
     axs = axs.flatten()  
 
     for i, solver in enumerate(solvers):
@@ -32,9 +32,6 @@ def main():
         axs[i].set_xlabel('Instance')
         axs[i].set_ylabel('Time (s)')
         axs[i].grid(True, axis='y', linestyle='--', alpha=0.7)
-
-    # for j in range(len(solvers), 4):
-    #     fig.delaxes(axs[j])
 
     plt.tight_layout()
     plt.savefig(f"{folder.split('/')[-2]}.png")
