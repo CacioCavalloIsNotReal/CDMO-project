@@ -1,6 +1,6 @@
 {
     "SB_gecode": {
-        "time": 10,
+        "time": 4,
         "optimal": true,
         "obj": 436,
         "sol": [
@@ -40,8 +40,8 @@
         ]
     },
     "gecode": {
-        "time": 300,
-        "optimal": false,
+        "time": 4,
+        "optimal": true,
         "obj": 436,
         "sol": [
             [
@@ -80,7 +80,7 @@
         ]
     },
     "SB_chuffed": {
-        "time": 3,
+        "time": 4,
         "optimal": true,
         "obj": 436,
         "sol": [
@@ -120,8 +120,8 @@
         ]
     },
     "chuffed": {
-        "time": 300,
-        "optimal": false,
+        "time": 4,
+        "optimal": true,
         "obj": 436,
         "sol": [
             [

@@ -28,7 +28,7 @@
         ]
     },
     "gecode": {
-        "time": 221,
+        "time": 1,
         "optimal": true,
         "obj": 226,
         "sol": [
@@ -56,7 +56,7 @@
         ]
     },
     "SB_chuffed": {
-        "time": 0,
+        "time": 1,
         "optimal": true,
         "obj": 226,
         "sol": [

@@ -27,7 +27,7 @@
         ]
     },
     "gecode": {
-        "time": 22,
+        "time": 0,
         "optimal": true,
         "obj": 322,
         "sol": [

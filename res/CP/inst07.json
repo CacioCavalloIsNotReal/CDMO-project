@@ -1,7 +1,7 @@
 {
     "SB_gecode": {
-        "time": 300,
-        "optimal": false,
+        "time": 37,
+        "optimal": true,
         "obj": 167,
         "sol": [
             [
