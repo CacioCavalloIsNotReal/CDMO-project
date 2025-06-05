@@ -80,8 +80,8 @@ def add_symmetry_breaking(prob, x, courier_indices, item_indices, capacities, si
             group.sort()
             for i in range(len(group) - 1):
                 curr, next_courier = group[i], group[i + 1]
-                load_curr = pulp.lpSum(sizes[j] * x[curr][j] for j in range(n))
-                load_next = pulp.lpSum(sizes[j] * x[next_courier][j] for j in range(n))
+                load_curr = pulp.lpSum(sizes[j] * x[curr][j] for j in item_indices)
+                load_next = pulp.lpSum(sizes[j] * x[next_courier][j] for j in item_indices)
                 prob += load_curr >= load_next
 
 def solve_model(model, variables, solver_name, time_limit_sec=305):
