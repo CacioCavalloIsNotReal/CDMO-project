@@ -34,6 +34,14 @@ def parse_instance(filepath):
         'origin_idx': n
     }
 
+def generate_lowerbound(distances, n, origin_idx):
+    bounds = []
+    for i in range(n):
+        to_item = distances.get((origin_idx, i), 0)
+        from_item = distances.get((i, origin_idx), 0)
+        bounds.append(to_item + from_item)
+    return max(bounds)
+
 def model_wrapper(queue, model_func, *args, **kwargs):
     try:
         result = model_func(*args, **kwargs)

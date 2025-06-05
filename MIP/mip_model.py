@@ -1,7 +1,8 @@
 import pulp
 import time
+from .mip_utils import generate_lowerbound
 
-def build_mcp_model(params, add_symmetry_break=False):
+def build_mcp_model(params, add_symmetry_break=False, lower_bound=None):
     m = params['m']
     n = params['n']
     capacities = params['capacities']
@@ -24,6 +25,10 @@ def build_mcp_model(params, add_symmetry_break=False):
     # Objective - minimize max distance per courier
     prob += Z
 
+    # Add lower bound constraint if provided
+    if lower_bound is not None:
+        prob += Z >= lower_bound
+        
     # Assign each item to exactly one courier
     for j in item_indices:
         prob += pulp.lpSum(x[i][j] for i in courier_indices) == 1
@@ -130,7 +135,10 @@ def reconstruct_tours(solution, variables, params):
     return tours
 
 def solve_mcp_mip(params, time_limit_sec=305, add_symmetry_break=False, solver="PULP_CBC_CMD"):
-    model, variables = build_mcp_model(params, add_symmetry_break)
+
+    lower_bound = generate_lowerbound(params['distances'], params['n'], params['origin_idx'])
+
+    model, variables = build_mcp_model(params, add_symmetry_break, lower_bound)
     solution = solve_model(model, variables, solver, time_limit_sec)
 
     results = {
