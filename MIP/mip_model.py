@@ -26,20 +26,23 @@ def build_mcp_model(params, add_symmetry_break=False):
 
     # Assign each item to exactly one courier
     for j in item_indices:
-        prob += pulp.lpSum(x[i][j] for i in courier_indices) == 1, f"Assign_item_{j}"
+        prob += pulp.lpSum(x[i][j] for i in courier_indices) == 1
 
     # Respect capacity limits
     for i in courier_indices:
-        prob += pulp.lpSum(sizes[j] * x[i][j] for j in item_indices) <= capacities[i], f"Capacity_{i}"
+        prob += pulp.lpSum(sizes[j] * x[i][j] for j in item_indices) <= capacities[i]
 
     for i in courier_indices:
+        # Courier leaves the depot at most once
+        prob += pulp.lpSum(y[i][origin_idx][k] for k in item_indices) <= 1
+
         # Only leave depot if you have items
         prob += pulp.lpSum(y[i][origin_idx][k] for k in item_indices) <= pulp.lpSum(x[i][j] for j in item_indices)
 
         # Ensure round trip (same in and out arcs at depot)
         prob += pulp.lpSum(y[i][origin_idx][k] for k in item_indices) == pulp.lpSum(y[i][k][origin_idx] for k in item_indices)
 
-        # Item entry/exit balance
+        # Flow conservation
         for j in item_indices:
             prob += pulp.lpSum(y[i][k][j] for k in all_loc_indices if k != j) == x[i][j]
             prob += pulp.lpSum(y[i][j][k] for k in all_loc_indices if k != j) == x[i][j]
@@ -67,7 +70,6 @@ def build_mcp_model(params, add_symmetry_break=False):
     return prob, {'x': x, 'y': y, 'u': u, 'Z': Z}
 
 def add_symmetry_breaking(prob, x, courier_indices, item_indices, capacities, sizes):
-    # TODO: improve grouping if other courier features matter later
     identical_groups = {}
     for i in courier_indices:
         cap = capacities[i]
@@ -76,11 +78,11 @@ def add_symmetry_breaking(prob, x, courier_indices, item_indices, capacities, si
     for cap, group in identical_groups.items():
         if len(group) > 1:
             group.sort()
-            for idx in range(len(group) - 1):
-                i, i_next = group[idx], group[idx + 1]
-                load_i = pulp.lpSum(sizes[j] * x[i][j] for j in item_indices)
-                load_next = pulp.lpSum(sizes[j] * x[i_next][j] for j in item_indices)
-                prob += load_i >= load_next, f"SymBreak_{i}_{i_next}"
+            for i in range(len(group) - 1):
+                curr, next_courier = group[i], group[i + 1]
+                load_curr = pulp.lpSum(sizes[j] * x[curr][j] for j in item_indices)
+                load_next = pulp.lpSum(sizes[j] * x[next_courier][j] for j in item_indices)
+                prob += load_curr >= load_next
 
 def solve_model(model, variables, solver_name, time_limit_sec=305):
     solver_map = {
@@ -105,34 +107,25 @@ def solve_model(model, variables, solver_name, time_limit_sec=305):
     }
 
 def reconstruct_tours(solution, variables, params):
-    if not solution['is_optimal'] and solution['objective'] is None:
+    if not solution['objective']:
         return [[] for _ in range(params['m'])]
 
     x, u = variables['x'], variables['u']
     m, n = params['m'], params['n']
     tours = [[] for _ in range(m)]
 
-    # Build assignment dict
-    assignments = {
-        i: [j for j in range(n) if x[i][j].value() and x[i][j].value() > 1e-4]
-        for i in range(m)
-    }
-
+    # Get assignments - trust the solver
     for i in range(m):
-        if not assignments[i]:
-            continue
-        positions = [(j + 1, u[i][j].value()) for j in assignments[i] if u[i][j].value() is not None]
-        positions.sort(key=lambda x: x[1])
-        tours[i] = [item for item, _ in positions]
-
-    # Handle any missed items
-    expected = set(range(1, n + 1))
-    actual = set(item for tour in tours for item in tour)
-    for missing in expected - actual:
-        for i in range(m):
-            if x[i][missing - 1].value() and x[i][missing - 1].value() > 1e-4:
-                tours[i].append(missing)
-                break
+        assigned_items = []
+        for j in range(n):
+            if x[i][j].value() > 0.5:
+                pos = u[i][j].value()
+                if pos:
+                    assigned_items.append((j + 1, pos))
+        
+        # Sort by position and build tour
+        assigned_items.sort(key=lambda item: item[1])
+        tours[i] = [item[0] for item in assigned_items]
 
     return tours
 
@@ -141,7 +134,7 @@ def solve_mcp_mip(params, time_limit_sec=305, add_symmetry_break=False, solver="
     solution = solve_model(model, variables, solver, time_limit_sec)
 
     results = {
-        'time': min(int(solution['solve_time']), time_limit_sec),
+        'time': solution['solve_time'],
         'optimal': solution['is_optimal'],
         'obj': int(round(solution['objective'])) if solution['objective'] is not None else -1,
         'sol': []
@@ -153,29 +146,29 @@ def solve_mcp_mip(params, time_limit_sec=305, add_symmetry_break=False, solver="
 
     return results
 
-def verify_objective(results, params):
-    if not results['sol']:
+def verify_objective(result, params):
+    if not result['sol']:
         return
 
     distances = params['distances']
-    origin_idx = params['origin_idx']
+    depot = params['origin_idx']
     max_dist = 0
 
-    for tour in results['sol']:
+    for tour in result['sol']:
         if not tour:
             continue
 
         dist = 0
-        prev = origin_idx
-        for curr in [j - 1 for j in tour]:
-            dist += distances.get((prev, curr), 0)
-            prev = curr
-        dist += distances.get((prev, origin_idx), 0)
-
+        current = depot
+        
+        for item in tour:
+            next_loc = item - 1
+            dist += distances.get((current, next_loc), 0)
+            current = next_loc
+        
+        dist += distances.get((current, depot), 0)
         max_dist = max(max_dist, dist)
 
-    if abs(max_dist - results['obj']) > 0.5:
-        print(f"WARNING: Calculated distance {max_dist} differs from reported {results['obj']}")
-        results['obj'] = max_dist
-    else:
-        print(f"Objective verification passed: {results['obj']} matches calculated distance {max_dist}")
+    if abs(max_dist - result['obj']) > 0.5:
+        print(f"Warning: Distance mismatch - calculated: {max_dist}, reported: {result['obj']}")
+        result['obj'] = max_dist

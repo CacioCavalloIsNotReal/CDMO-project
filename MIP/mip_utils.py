@@ -4,150 +4,107 @@ import os
 import json
 
 def parse_instance(filepath):
-    """Parses the MCP instance file."""
-    try:
-        with open(filepath, 'r') as f:
-            lines = f.readlines()
-            lines = [line.strip() for line in lines if line.strip()] # Remove empty lines and strip whitespace
+    with open(filepath, 'r') as f:
+        lines = [line.strip() for line in f if line.strip()]
 
-            m = int(lines[0])
-            n = int(lines[1])
-            capacities_list = list(map(int, lines[2].split()))
-            sizes_list = list(map(int, lines[3].split()))
+    m = int(lines[0])
+    n = int(lines[1])
+    capacities = list(map(int, lines[2].split()))
+    sizes = list(map(int, lines[3].split()))
 
-            # Read distance matrix (n+1) x (n+1)
-            distances_flat = []
-            for i in range(4, 4 + n + 1):
-                if i < len(lines) and lines[i]:
-                    distances_flat.extend(map(int, lines[i].split()))
-                else:
-                    raise ValueError(f"Missing or empty line for distance matrix row starting at line index {i} (expected {n+1} rows)")
+    # Read distance matrix
+    distances = []
+    for i in range(4, 4 + n + 1):
+        distances.extend(map(int, lines[i].split()))
 
-            if len(capacities_list) != m:
-                raise ValueError(f"Number of capacities ({len(capacities_list)}) does not match m ({m})")
-            if len(sizes_list) != n:
-                raise ValueError(f"Number of sizes ({len(sizes_list)}) does not match n ({n})")
-            if len(distances_flat) != (n + 1) * (n + 1):
-                 raise ValueError(f"Distance matrix size incorrect. Expected {(n+1)*(n+1)} elements, got {len(distances_flat)}")
+    # Build distance dict
+    dist_matrix = {}
+    idx = 0
+    for r in range(n + 1):
+        for c in range(n + 1):
+            dist_matrix[(r, c)] = distances[idx]
+            idx += 1
 
-            # Use dictionaries keyed by 0-based indices
-            capacities = {i: capacities_list[i] for i in range(m)}
-            sizes = {j: sizes_list[j] for j in range(n)}
-
-            dist_matrix = {}
-            origin_idx_0based = n # The origin is the last index (n+1 in 1-based, n in 0-based)
-            idx = 0
-            for r in range(n + 1): # 0 to n
-                for c in range(n + 1): # 0 to n
-                    dist_matrix[(r, c)] = distances_flat[idx]
-                    idx += 1
-
-            params = {
-                'm': m,
-                'n': n,
-                'capacities': capacities, # dict courier_idx -> capacity
-                'sizes': sizes,          # dict item_idx -> size
-                'distances': dist_matrix, # dict (from_idx, to_idx) -> distance
-                'origin_idx': origin_idx_0based # Index of the origin in 0-based system
-            }
-            return params
-
-    except FileNotFoundError:
-        print(f"Error: Input file not found at {filepath}", file=sys.stderr)
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error parsing instance file {filepath}: {e}", file=sys.stderr)
-        sys.exit(1)
+    return {
+        'm': m,
+        'n': n,
+        'capacities': {i: capacities[i] for i in range(m)},
+        'sizes': {j: sizes[j] for j in range(n)},
+        'distances': dist_matrix,
+        'origin_idx': n
+    }
 
 def model_wrapper(queue, model_func, *args, **kwargs):
     try:
         result = model_func(*args, **kwargs)
         queue.put(result)
     except Exception as e:
-        queue.put({'solution_found': False, 'status': 'error', 'error': str(e)})
+        queue.put({'solution_found': False, 'error': str(e)})
 
-def run_mip_with_external_timeout(external_timeout_seconds, model_func, *args, **kwargs):
+def run_with_timeout(timeout, model_func, *args, **kwargs):
     queue = multiprocessing.Queue()
     p = multiprocessing.Process(target=model_wrapper, args=(queue, model_func, *args), kwargs=kwargs)
     p.start()
-    p.join(external_timeout_seconds)
+    p.join(timeout)
 
     if p.is_alive():
         p.terminate()
         p.join()
         return {'solution_found': False, 'status': 'timeout'}
 
-    if not queue.empty():
-        return queue.get()
-    else:
-        return {'solution_found': False, 'status': 'no_result'}
+    return queue.get() if not queue.empty() else {'solution_found': False}
 
-def write_output(results, output_path, approach_name="mip_pulp"): # Allow customizing approach name
-    """Writes the results to a JSON file."""
+def write_output(results, output_path, solver="mip"):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    try:
-        with open(output_path, 'w') as f:
-            output_data = {approach_name: results}
-            json.dump(output_data, f, indent=4)
-        print(f"Results written to {output_path}")
-    except Exception as e:
-        print(f"Error writing output file {output_path}: {e}", file=sys.stderr)
+    with open(output_path, 'w') as f:
+        json.dump({solver: results}, f, indent=4)
 
-def combine_results(result_nosymbreak_dir, result_symbreak_dir):
-    combined_results = {}
-    for subfolder in os.listdir(result_nosymbreak_dir):
-        if subfolder.startswith('.'):
-            # Skip hidden folders.
+def combine_results(no_symm_dir, symm_dir):
+    combined = {}
+    
+    # Process no symmetry results
+    for folder in os.listdir(no_symm_dir):
+        if folder.startswith('.'):
             continue
-        folder = os.path.join(result_nosymbreak_dir, subfolder)
-        for results_file in sorted(os.listdir(folder)):
-            if results_file.startswith('.'):
-                # Skip hidden folders.
+        folder_path = os.path.join(no_symm_dir, folder)
+        for file in os.listdir(folder_path):
+            if file.startswith('.'):
                 continue
-            if results_file not in combined_results.keys():
-                combined_results[results_file] = {}
+            if file not in combined:
+                combined[file] = {}
             
-            updated_results = {}
-            results = json.load(open(os.path.join(folder, results_file)))
-            if 'cbc' in results.keys():
-                updated_results = {'cbc': results['cbc']}
-            elif 'gurobi' in results.keys():
-                updated_results = {'gurobi': results['gurobi']}
-            elif 'highs' in results.keys():
-                updated_results = {'highs': results['highs']}
-            else:
-                print("ERROR")
+            with open(os.path.join(folder_path, file)) as f:
+                results = json.load(f)
+            
+            # Get the solver key
+            for solver in ['cbc', 'gurobi', 'highs']:
+                if solver in results:
+                    combined[file][solver] = results[solver]
+                    break
 
-            combined_results[results_file].update(updated_results)
-    for subfolder in os.listdir(result_symbreak_dir):
-        if subfolder.startswith('.'):
-            # Skip hidden folders.
+    # Process symmetry breaking results
+    for folder in os.listdir(symm_dir):
+        if folder.startswith('.'):
             continue
-        folder = os.path.join(result_symbreak_dir, subfolder)
-        for results_file in sorted(os.listdir(folder)):
-            if results_file.startswith('.'):
-                # Skip hidden folders.
+        folder_path = os.path.join(symm_dir, folder)
+        for file in os.listdir(folder_path):
+            if file.startswith('.'):
                 continue
-            if results_file not in combined_results.keys():
-                combined_results[results_file] = {}
+            if file not in combined:
+                combined[file] = {}
+            
+            with open(os.path.join(folder_path, file)) as f:
+                results = json.load(f)
+            
+            # Get the solver key with symbreak suffix
+            for solver in ['cbc', 'gurobi', 'highs']:
+                if solver in results:
+                    combined[file][f"{solver}_symbreak"] = results[solver]
+                    break
 
-            updated_results = {}
-            results = json.load(open(os.path.join(folder, results_file)))
-            if 'cbc' in results.keys():
-                updated_results = {'cbc_symbreak': results['cbc']}
-            elif 'gurobi' in results.keys():
-                updated_results = {'gurobi_symbreak': results['gurobi']}
-            elif 'highs' in results.keys():
-                updated_results = {'highs_symbreak': results['highs']}
-            else:
-                print("ERROR")
-
-            combined_results[results_file].update(updated_results)
-
+    # Write combined results
     os.makedirs("res/MIP", exist_ok=True)
-
-    for file_name, result in combined_results.items():
-        output_path = os.path.join("res/MIP", file_name)
+    for filename, result in combined.items():
+        output_path = os.path.join("res/MIP", filename)
         with open(output_path, 'w') as f:
             json.dump(result, f, indent=4)
-        print(f"Combined results written to {output_path}")
