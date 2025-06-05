@@ -156,7 +156,6 @@ def write_output(results, output_path):
         with open(output_path, 'w') as f:
             output_data = {"z3": results}
             json.dump(output_data, f, indent=4)
-        # print(f"Results written to {output_path}")
     except Exception as e:
         print(f"Error writing output file {output_path}: {e}", file=sys.stderr)
 
@@ -192,4 +191,41 @@ def combine_results(result_nosymbreak_dir, result_symbreak_dir):
         output_path = os.path.join("res/SMT", file_name)
         with open(output_path, 'w') as f:
             json.dump(result, f, indent=4)
-        # print(f"Combined results written to {output_path}")
+
+def choose_instance(instance_name):
+    if int(instance_name) in range(1, 10):
+        instance = f"inst0{instance_name}.dat"
+    elif int(instance_name) in range(10, 22):
+        instance = f"inst{instance_name}.dat"
+    return instance
+
+def prepare_solution(input):
+    if input['solution_found']:
+        item_order = np.array(input['item_order']).T
+        couriers = np.unique(item_order[0])
+
+        percorso = []
+        for courier in couriers:
+            mask = item_order[0] == courier
+            courier_m = item_order[:, mask]
+            positions = np.argsort(courier_m[2])
+            n_zeros = sum(courier_m[2]==0)
+            m_idxs = positions[n_zeros:]
+            trip = [int(courier_m[1][idx]+1) for idx in m_idxs]
+            percorso.append(trip)
+
+        output = {
+            'time' : int(input['time']) if  input['time']<=300 else 300,
+            'optimal' : input['solution_found'] if  input['time']<300 else False, 
+            'obj' : input['max_distance'],
+            'sol': percorso
+            }
+    else:
+        output = {
+            'time' : 300,
+            'optimal' : False,
+            'obj' : 0,
+            'sol': []
+            }
+
+    return output

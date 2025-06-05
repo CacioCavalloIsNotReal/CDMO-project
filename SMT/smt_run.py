@@ -6,44 +6,6 @@ import numpy as np
 
 MAX_TIME = 300
 
-def choose_instance(instance_name):
-    if int(instance_name) in range(1, 10):
-        instance = f"inst0{instance_name}.dat"
-    elif int(instance_name) in range(10, 22):
-        instance = f"inst{instance_name}.dat"
-    return instance
-
-def prepare_solution(input):
-    if input['solution_found']:
-        item_order = np.array(input['item_order']).T
-        couriers = np.unique(item_order[0])
-
-        percorso = []
-        for courier in couriers:
-            mask = item_order[0] == courier
-            courier_m = item_order[:, mask]
-            positions = np.argsort(courier_m[2])
-            n_zeros = sum(courier_m[2]==0)
-            m_idxs = positions[n_zeros:]
-            trip = [int(courier_m[1][idx]+1) for idx in m_idxs]
-            percorso.append(trip)
-
-        output = {
-            'time' : int(input['time']) if  input['time']<=300 else 300,
-            'optimal' : input['solution_found'] if  input['time']<300 else False, 
-            'obj' : input['max_distance'],
-            'sol': percorso
-            }
-    else:
-        output = {
-            'time' : 300,
-            'optimal' : False,
-            'obj' : 0,
-            'sol': []
-            }
-
-    return output
-
 def execute_smt(symbreak: bool = False, instance_name: str = "all"):
     os.makedirs("./SMT/result_symbreak", exist_ok=True)
     os.makedirs("./SMT/result_nosymbreak", exist_ok=True)
@@ -71,8 +33,8 @@ def execute_smt(symbreak: bool = False, instance_name: str = "all"):
                     s=s, 
                     d=d,
                     lower = generate_lowerbound(d, n),
-                    symm_break=sb, # Prova con True o False
-                    timeout=MAX_TIME # Timeout interno per Z3 (in ms)
+                    symm_break=sb,
+                    timeout=MAX_TIME
                 )
                 if sb:
                     write_output(prepare_solution(result_dict), f'./SMT/result_symbreak/{filename}.json')
