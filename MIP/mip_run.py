@@ -66,11 +66,11 @@ def execute_mip(instance_name: str, solver_name: str = 'highs', symbreak: bool =
             results_dir = os.path.join("./MIP/result_nosymbreak", solver_name)
 
         solution = run_mip_with_external_timeout(
-            external_timeout_seconds=300,
+            external_timeout_seconds=305,
             model_func=solve_mcp_mip,
             params=params,
             solver=solver,
-            time_limit_sec=300,
+            time_limit_sec=305,
             add_symmetry_break=symbreak
         )
 

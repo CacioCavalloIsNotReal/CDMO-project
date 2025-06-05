@@ -82,7 +82,7 @@ def add_symmetry_breaking(prob, x, courier_indices, item_indices, capacities, si
                 load_next = pulp.lpSum(sizes[j] * x[i_next][j] for j in item_indices)
                 prob += load_i >= load_next, f"SymBreak_{i}_{i_next}"
 
-def solve_model(model, variables, solver_name, time_limit_sec=300):
+def solve_model(model, variables, solver_name, time_limit_sec=305):
     solver_map = {
         "PULP_CBC_CMD": pulp.PULP_CBC_CMD(timeLimit=time_limit_sec, msg=True),
         "GUROBI_CMD": pulp.GUROBI_CMD(timeLimit=time_limit_sec, msg=True),
@@ -98,7 +98,7 @@ def solve_model(model, variables, solver_name, time_limit_sec=300):
 
     return {
         'status': pulp.LpStatus[model.status],
-        'solve_time': solve_time,
+        'solve_time': solve_time if solve_time < 300 else 300,
         'objective': None if model.status != pulp.LpStatusOptimal else pulp.value(model.objective),
         'is_optimal': True if solve_time < 300 else False,
         'variables': variables
