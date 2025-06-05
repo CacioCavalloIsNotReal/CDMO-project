@@ -98,7 +98,7 @@ def solve_model(model, variables, solver_name, time_limit_sec=305):
 
     return {
         'status': pulp.LpStatus[model.status],
-        'solve_time': solve_time if solve_time < 300 else 300,
+        'solve_time': int(solve_time) if solve_time < 300 else 300,
         'objective': None if model.status != pulp.LpStatusOptimal else pulp.value(model.objective),
         'is_optimal': True if solve_time < 300 else False,
         'variables': variables
