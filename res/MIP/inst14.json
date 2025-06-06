@@ -1,0 +1,32 @@
+{
+    "cbc": {
+        "time": 300,
+        "optimal": false,
+        "obj": -1,
+        "sol": []
+    },
+    "highs": {
+        "time": 300,
+        "optimal": false,
+        "obj": -1,
+        "sol": []
+    },
+    "gurobi": {
+        "time": 300,
+        "optimal": false,
+        "obj": -1,
+        "sol": []
+    },
+    "cbc_symbreak": {
+        "time": 300,
+        "optimal": false,
+        "obj": -1,
+        "sol": []
+    },
+    "gurobi_symbreak": {
+        "time": 300,
+        "optimal": false,
+        "obj": -1,
+        "sol": []
+    }
+}
