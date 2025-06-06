@@ -85,7 +85,7 @@ def combine_results(no_symm_dir, symm_dir):
                 results = json.load(f)
             
             # Get the solver key
-            for solver in ['cbc', 'gurobi', 'highs']:
+            for solver in ['gurobi', 'highs']:
                 if solver in results:
                     combined[file][solver] = results[solver]
                     break
@@ -105,7 +105,7 @@ def combine_results(no_symm_dir, symm_dir):
                 results = json.load(f)
             
             # Get the solver key with symbreak suffix
-            for solver in ['cbc', 'gurobi', 'highs']:
+            for solver in ['gurobi', 'highs']:
                 if solver in results:
                     combined[file][f"{solver}_symbreak"] = results[solver]
                     break

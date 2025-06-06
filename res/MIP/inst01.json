@@ -1,13 +1,13 @@
 {
-    "cbc": {
+    "gurobi": {
         "time": 0,
         "optimal": true,
         "obj": 14,
         "sol": [
             [
-                4,
+                1,
                 3,
-                1
+                4
             ],
             [
                 2,
@@ -33,8 +33,8 @@
             ]
         ]
     },
-    "gurobi": {
-        "time": 0,
+    "gurobi_symbreak": {
+        "time": 1,
         "optimal": true,
         "obj": 14,
         "sol": [
@@ -50,24 +50,7 @@
             ]
         ]
     },
-    "cbc_symbreak": {
-        "time": 2,
-        "optimal": true,
-        "obj": 14,
-        "sol": [
-            [
-                4,
-                3,
-                1
-            ],
-            [
-                2,
-                5,
-                6
-            ]
-        ]
-    },
-    "gurobi_symbreak": {
+    "highs_symbreak": {
         "time": 0,
         "optimal": true,
         "obj": 14,

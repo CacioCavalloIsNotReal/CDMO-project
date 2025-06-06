@@ -1,5 +1,5 @@
 {
-    "cbc": {
+    "gurobi": {
         "time": 300,
         "optimal": false,
         "obj": -1,
@@ -11,13 +11,13 @@
         "obj": -1,
         "sol": []
     },
-    "gurobi": {
+    "gurobi_symbreak": {
         "time": 300,
         "optimal": false,
         "obj": -1,
         "sol": []
     },
-    "gurobi_symbreak": {
+    "highs_symbreak": {
         "time": 300,
         "optimal": false,
         "obj": -1,

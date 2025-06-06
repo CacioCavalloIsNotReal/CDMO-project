@@ -91,7 +91,6 @@ def add_symmetry_breaking(prob, x, courier_indices, item_indices, capacities, si
 
 def solve_model(model, variables, solver_name, time_limit_sec=305):
     solver_map = {
-        "PULP_CBC_CMD": pulp.PULP_CBC_CMD(timeLimit=time_limit_sec, msg=True),
         "GUROBI_CMD": pulp.GUROBI_CMD(timeLimit=time_limit_sec, msg=True),
         "HiGHS_CMD": pulp.HiGHS_CMD(timeLimit=time_limit_sec, msg=True),
     }
@@ -103,11 +102,13 @@ def solve_model(model, variables, solver_name, time_limit_sec=305):
     model.solve(solver_map[solver_name])
     solve_time = time.time() - start_time
 
+    print("DEBUG: Solver status:", pulp.LpStatus[model.status])
+    
     return {
         'status': pulp.LpStatus[model.status],
         'solve_time': int(solve_time) if solve_time < 300 else 300,
         'objective': None if model.status != pulp.LpStatusOptimal else pulp.value(model.objective),
-        'is_optimal': True if solve_time < 300 else False,
+        'is_optimal': model.status == pulp.LpStatusOptimal if solve_time < 300 else False,
         'variables': variables
     }
 
@@ -134,7 +135,7 @@ def reconstruct_tours(solution, variables, params):
 
     return tours
 
-def solve_mcp_mip(params, time_limit_sec=305, add_symmetry_break=False, solver="PULP_CBC_CMD"):
+def solve_mcp_mip(params, time_limit_sec=305, add_symmetry_break=False, solver="HiGHS_CMD"):
 
     lower_bound = generate_lowerbound(params['distances'], params['n'], params['origin_idx'])
 

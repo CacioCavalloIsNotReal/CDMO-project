@@ -27,7 +27,7 @@ if __name__ == "__main__":
             
             
             # EXAMPLE: python main.py mip gurobi False 1
-            # You can choose between gurobi, highs, and cbc
+            # You can choose between gurobi and highs
             execute_mip(
                 solver_name=solver, 
                 symbreak=symbreak, 

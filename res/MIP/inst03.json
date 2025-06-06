@@ -1,44 +1,4 @@
 {
-    "cbc": {
-        "time": 0,
-        "optimal": true,
-        "obj": 12,
-        "sol": [
-            [
-                5,
-                6,
-                3
-            ],
-            [
-                4,
-                2
-            ],
-            [
-                7,
-                1
-            ]
-        ]
-    },
-    "highs": {
-        "time": 0,
-        "optimal": true,
-        "obj": 12,
-        "sol": [
-            [
-                5,
-                4,
-                2
-            ],
-            [
-                3,
-                6
-            ],
-            [
-                7,
-                1
-            ]
-        ]
-    },
     "gurobi": {
         "time": 0,
         "optimal": true,
@@ -59,19 +19,19 @@
             ]
         ]
     },
-    "cbc_symbreak": {
-        "time": 0,
+    "highs": {
+        "time": 2,
         "optimal": true,
         "obj": 12,
         "sol": [
             [
                 5,
-                6,
-                3
-            ],
-            [
                 4,
                 2
+            ],
+            [
+                3,
+                6
             ],
             [
                 7,
@@ -96,6 +56,26 @@
             [
                 1,
                 7
+            ]
+        ]
+    },
+    "highs_symbreak": {
+        "time": 1,
+        "optimal": true,
+        "obj": 12,
+        "sol": [
+            [
+                5,
+                4,
+                2
+            ],
+            [
+                3,
+                6
+            ],
+            [
+                7,
+                1
             ]
         ]
     }

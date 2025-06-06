@@ -9,12 +9,10 @@ def choose_solver(solver_name):
     match solver_name:
         case "gurobi":
             return "GUROBI_CMD"
-        case "cbc":
-            return "PULP_CBC_CMD"
         case "highs":
             return "HiGHS_CMD"
         case _:
-            print("Invalid solver name. Please choose from Gurobi, CBC, or HiGHS.")
+            print("Invalid solver name. Please choose from Gurobi or HiGHS.")
 
 def choose_instance(instance_name):
     if int(instance_name) in range(1, 10):
