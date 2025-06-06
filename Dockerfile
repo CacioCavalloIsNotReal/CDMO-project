@@ -1,12 +1,12 @@
 FROM --platform=linux/amd64 ubuntu:22.04
 
 RUN apt-get update
-RUN apt-get install -y tzdata
+# RUN apt-get install -y tzdata
 RUN apt-get install -y wget
 
 RUN apt-get install -y python3-pip
 RUN apt-get install -y libgl1-mesa-dev
-RUN apt-get install -y libglib2.0-0
+# RUN apt-get install -y libglib2.0-0
 RUN apt-get update && apt-get install -y libqt5printsupport5
 RUN apt-get install -y nano
 

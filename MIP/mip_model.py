@@ -91,8 +91,8 @@ def add_symmetry_breaking(prob, x, courier_indices, item_indices, capacities, si
 
 def solve_model(model, variables, solver_name, time_limit_sec=305):
     solver_map = {
-        "GUROBI_CMD": pulp.GUROBI_CMD(timeLimit=time_limit_sec, msg=True),
-        "HiGHS_CMD": pulp.HiGHS_CMD(timeLimit=time_limit_sec, msg=True),
+        "GUROBI_CMD": pulp.GUROBI_CMD(timeLimit=time_limit_sec, msg=False),
+        "HiGHS_CMD": pulp.HiGHS_CMD(timeLimit=time_limit_sec, msg=False),
     }
 
     if solver_name not in solver_map:
