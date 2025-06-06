@@ -52,8 +52,6 @@ A common preprocessing step is applied across all methods, which involves parsin
 ├── requirements.txt     # Python dependencies
 ├── report.tex           # Detailed project report in LaTeX
 ├── gurobi.lic           # Gurobi license file (user-provided, required for Gurobi solver)
-├── execute_mip_script.sh # Example script for running MIP experiments
-└── ... (other utility scripts and configuration files)
 ```
 
 ## Setup and Installation
